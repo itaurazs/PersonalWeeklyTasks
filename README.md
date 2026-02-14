@@ -9,11 +9,18 @@ A lightweight, mobile-first weekly task tracker PWA — built to replace noteboo
 - **Quick add** — type and hit Enter to add tasks instantly
 - **Day assignment** — assign tasks to specific days (Mon–Sun) or keep them general
 - **Week navigation** — browse past and future weeks, plan ahead
+- **Search across weeks** — find tasks from any week and jump to the result
 - **Rollover** — carry incomplete tasks forward to the next week with full tracking
   - Source week shows "→ Moved to next week" with faded styling
   - Target week shows "↻ Rolled over" with undo support
 - **Progress tracking** — visual progress bar per week
-- **Swipe navigation** — swipe left/right to change weeks on mobile
+- **Insights dashboard** — completion rates, streaks, tag/priority counts, and weekly summary dots
+- **Dark mode** — toggleable theme with persistence
+- **Notes & estimates** — optional task notes and time estimates
+- **Duplicate task** — clone a task with one tap
+- **Swipe gestures** — swipe right to complete, swipe left to delete
+- **Custom tags** — add/rename/recolor categories
+- **Backup & restore** — export/import JSON to keep data safe
 - **Offline-ready** — all data stored in localStorage, no server required
 - **Add to Home Screen** — PWA meta tags for full-screen app experience on iOS and Android
 

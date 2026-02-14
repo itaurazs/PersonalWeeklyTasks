@@ -44,6 +44,29 @@
     --safe-t: env(safe-area-inset-top, 0px);
     --safe-b: env(safe-area-inset-bottom, 0px);
   }
+  body.dark {
+    --bg: #0f1216;
+    --bg-card: #171b22;
+    --bg-header: rgba(15,18,22,0.92);
+    --text: #f1f3f5;
+    --text-sec: #c1c6cc;
+    --text-muted: #8a9097;
+    --accent: #ff7a45;
+    --accent-light: rgba(255,122,69,0.16);
+    --accent-border: rgba(255,122,69,0.35);
+    --green: #2bbf7c;
+    --green-light: rgba(43,191,124,0.16);
+    --green-border: rgba(43,191,124,0.35);
+    --purple: #9d7bff;
+    --purple-light: rgba(157,123,255,0.16);
+    --purple-border: rgba(157,123,255,0.35);
+    --blue: #60a5fa;
+    --blue-light: rgba(96,165,250,0.16);
+    --border: rgba(255,255,255,0.08);
+    --border-s: rgba(255,255,255,0.14);
+    --sh: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.4);
+    --sh-lg: 0 8px 24px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.35);
+  }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; overflow:hidden; background:var(--bg); }
   body { font-family:'DM Sans',-apple-system,sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; }
@@ -414,6 +437,142 @@
     color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;
     box-shadow:0 2px 8px rgba(229,62,62,0.3);
   }
+
+  /* HEADER ACTIONS + SEARCH */
+  .hdr-actions { display:flex; align-items:center; gap:8px; }
+  .icon-btn {
+    background:var(--bg-card); border:1px solid var(--border); color:var(--text-sec);
+    width:34px; height:34px; border-radius:10px; font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--sh);
+  }
+  .icon-btn:active { transform:scale(0.95); }
+
+  .search-wrap {
+    margin-top:8px; display:flex; gap:6px; align-items:center;
+  }
+  .search-input {
+    flex:1; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border-s);
+    border-radius:12px; color:var(--text); font-size:13px; font-family:inherit; outline:none;
+    box-shadow:var(--sh);
+  }
+  .search-input::placeholder { color:var(--text-muted); }
+  .search-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,93,42,0.12); }
+  .search-clear {
+    background:var(--bg-card); border:1px solid var(--border); color:var(--text-muted);
+    width:34px; height:34px; border-radius:10px; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .search-results {
+    margin-top:6px; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:12px; max-height:220px; overflow:auto; box-shadow:var(--sh-lg);
+    display:none;
+  }
+  .search-results.vis { display:block; }
+  .sr-item {
+    padding:10px 12px; border-bottom:1px solid var(--border); cursor:pointer;
+    display:flex; flex-direction:column; gap:3px;
+  }
+  .sr-item:last-child { border-bottom:none; }
+  .sr-title { font-size:13px; font-weight:600; color:var(--text); }
+  .sr-meta { font-size:11px; color:var(--text-muted); }
+  .sr-empty { padding:12px; font-size:12px; color:var(--text-muted); text-align:center; }
+
+  /* HIGHLIGHT */
+  .ti.hi { border-color:var(--accent); box-shadow:0 0 0 2px rgba(232,93,42,0.18); }
+
+  /* NOTES */
+  .note {
+    margin-top:6px; padding:8px 10px; background:var(--bg); border:1px dashed var(--border);
+    border-radius:10px; font-size:12px; color:var(--text-sec); white-space:pre-wrap;
+  }
+  .note-btn { font-size:12px; color:var(--text-muted); cursor:pointer; background:none; border:none; padding:0; }
+
+  /* ESTIMATES */
+  .etag { font-size:10px; background:rgba(96,165,250,0.12); color:#3b82f6; padding:2px 7px; border-radius:6px; font-weight:600; }
+  .est-row { display:flex; align-items:center; gap:6px; margin-top:6px; }
+  .est-input {
+    width:80px; padding:6px 8px; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-size:12px; font-family:inherit; outline:none;
+  }
+  .est-label { font-size:11px; color:var(--text-muted); font-weight:600; }
+
+  /* INSIGHTS MODAL */
+  .ins-mo {
+    position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:70;
+    display:none; align-items:center; justify-content:center; padding:18px;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .ins-mo.vis { display:flex; }
+  .ins-md {
+    background:var(--bg-card); border-radius:22px; padding:20px;
+    max-width:440px; width:100%; max-height:80vh; overflow-y:auto;
+    border:1px solid var(--border); box-shadow:var(--sh-lg);
+  }
+  .ins-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .ins-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:800; color:var(--accent); }
+  .ins-close {
+    background:var(--bg); border:1px solid var(--border); color:var(--text-muted);
+    width:30px; height:30px; border-radius:10px; cursor:pointer; font-size:14px;
+  }
+  .ins-section { margin-top:14px; }
+  .ins-section h3 { font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px; }
+  .stat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .stat-card {
+    padding:10px 12px; background:var(--bg); border:1px solid var(--border);
+    border-radius:12px; display:flex; flex-direction:column; gap:4px;
+  }
+  .stat-val { font-size:16px; font-weight:700; color:var(--text); }
+  .stat-lbl { font-size:11px; color:var(--text-muted); }
+  .week-bars { display:flex; flex-direction:column; gap:6px; }
+  .week-bar { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted); }
+  .bar { flex:1; height:6px; background:rgba(0,0,0,0.08); border-radius:4px; overflow:hidden; }
+  .bar-fill { height:100%; background:var(--green); border-radius:4px; }
+
+  .tag-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .tag-color { width:28px; height:28px; border:none; background:transparent; padding:0; }
+  .tag-input {
+    flex:1; padding:6px 8px; background:var(--bg); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-size:12px; font-family:inherit;
+  }
+  .tag-del {
+    background:none; border:none; color:#e53e3e; font-size:14px; cursor:pointer;
+  }
+  .tag-add {
+    margin-top:6px; display:flex; gap:6px; align-items:center;
+  }
+  .tag-add-btn {
+    padding:8px 12px; background:var(--accent); color:#fff; border:none; border-radius:10px;
+    font-size:12px; cursor:pointer; font-weight:600;
+  }
+
+  .ins-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .ins-btn {
+    padding:8px 12px; background:var(--bg); border:1px solid var(--border);
+    border-radius:10px; font-size:12px; cursor:pointer; color:var(--text-sec);
+  }
+  .ins-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .theme-toggle { display:flex; align-items:center; gap:8px; }
+  .toggle {
+    width:44px; height:24px; border-radius:16px; background:rgba(0,0,0,0.2);
+    position:relative; cursor:pointer; border:1px solid var(--border);
+  }
+  .toggle::after {
+    content:''; position:absolute; width:18px; height:18px; border-radius:50%;
+    background:#fff; top:2px; left:2px; transition:left 0.2s;
+  }
+  .toggle.on { background:var(--accent); }
+  .toggle.on::after { left:22px; }
+
+  .month-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+  .month-cell {
+    background:var(--bg); border:1px solid var(--border); border-radius:10px;
+    padding:8px 6px; text-align:center; font-size:11px; color:var(--text-muted);
+  }
+  .month-dot { width:8px; height:8px; border-radius:50%; margin:6px auto 0; background:#bbb; }
+  .dot-good { background:var(--green); }
+  .dot-ok { background:#eab308; }
+  .dot-low { background:#e53e3e; }
 </style>
 </head>
 <body>
@@ -421,7 +580,10 @@
   <div class="hdr">
     <div class="hdr-top">
       <h1 class="title">Weekly Tasks</h1>
-      <button class="today-btn" id="todayBtn">Today</button>
+      <div class="hdr-actions">
+        <button class="today-btn" id="todayBtn">Today</button>
+        <button class="icon-btn" id="insightsBtn" title="Insights & Settings">☰</button>
+      </div>
     </div>
     <div class="wnav">
       <button class="nbtn" id="prevBtn">‹</button>
@@ -436,6 +598,11 @@
       <span class="prg-txt" id="prgTxt"></span>
     </div>
     <div class="dfilt" id="dfilt"></div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" placeholder="Search tasks across weeks..." autocomplete="off">
+      <button class="search-clear" id="searchClear">✕</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
   </div>
 
   <div class="tlist" id="tlist"></div>
@@ -458,6 +625,7 @@
     <div class="add-opts" id="priRow"></div>
     <div class="add-opts" id="catRow"></div>
     <div class="date-pick-row" id="dateRow"></div>
+    <div class="est-row" id="estRow"></div>
   </div>
 
   <div class="edit-mo" id="editMo">
@@ -466,6 +634,10 @@
 
   <div class="del-mo" id="delMo">
     <div class="del-md" id="delMdInner"></div>
+  </div>
+
+  <div class="ins-mo" id="insMo">
+    <div class="ins-md" id="insMdInner"></div>
   </div>
 
   <div class="mo" id="mo">
@@ -481,13 +653,16 @@
   </div>
 </div>
 
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
 <script>
 (function() {
   'use strict';
 
+  var STORAGE_KEY = 'wt5';
   var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var PRIORITIES = [{key:'high',label:'High'},{key:'med',label:'Med'},{key:'low',label:'Low'}];
-  var CATEGORIES = [
+  var DEFAULT_CATEGORIES = [
     {key:'work',label:'Work',color:'#e85d2a',bg:'rgba(232,93,42,0.1)'},
     {key:'personal',label:'Personal',color:'#7c5cdb',bg:'rgba(124,92,219,0.1)'},
     {key:'errands',label:'Errands',color:'#eab308',bg:'rgba(234,179,8,0.1)'},
@@ -497,11 +672,14 @@
   var RECURRENCE = [{key:'weekly',label:'Weekly'},{key:'biweekly',label:'Biweekly'},{key:'monthly',label:'Monthly'},{key:'yearly',label:'Yearly'}];
 
   var allTasks = {};
+  var categories = [];
+  var settings = { theme: 'light' };
   var weekKey = '';
   var selDay = null;
   var selPri = null;
   var selCat = null;
   var selRecur = null;
+  var selEst = null;
   var targetDate = null; // for future date task creation
   var rollSel = {};
   var deletedTask = null;
@@ -512,16 +690,44 @@
   var editTaskId = null; // task ID being edited in modal
   var editTaskState = {}; // temp state for edit modal fields
   var delPendingId = null; // task ID pending delete confirmation
+  var searchQuery = '';
+  var searchResults = [];
+  var highlightId = null;
+  var noteOpen = {};
+  var swipeInfo = null;
 
   // --- Storage ---
   var canLS = false;
   try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); canLS = true; } catch(e) {}
 
   function load() {
-    if (canLS) { try { var r = localStorage.getItem('wt5'); if (r) allTasks = JSON.parse(r); } catch(e) {} }
+    if (!canLS) return;
+    try {
+      var r = localStorage.getItem(STORAGE_KEY);
+      if (!r) return;
+      var parsed = JSON.parse(r);
+      if (parsed && parsed.tasks) {
+        allTasks = parsed.tasks || {};
+        categories = normalizeCategories(parsed.categories || []);
+        settings = Object.assign({theme:'light'}, parsed.settings || {});
+      } else if (parsed && typeof parsed === 'object') {
+        allTasks = parsed;
+        categories = normalizeCategories(DEFAULT_CATEGORIES);
+        settings = {theme:'light'};
+        save();
+      }
+    } catch(e) {}
   }
   function save() {
-    if (canLS) { try { localStorage.setItem('wt5', JSON.stringify(allTasks)); } catch(e) {} }
+    if (!canLS) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: 2,
+        tasks: allTasks,
+        categories: categories,
+        settings: settings
+      }));
+    } catch(e) {}
   }
 
   // --- Date utils ---
@@ -549,6 +755,49 @@
   function uid() { return Math.random().toString(36).slice(2,10); }
   function wt() { return allTasks[weekKey] || []; }
   function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function hexToRgb(hex) {
+    var h = hex.replace('#','').trim();
+    if (h.length === 3) h = h.split('').map(function(c){ return c+c; }).join('');
+    var n = parseInt(h, 16);
+    return {r:(n>>16)&255, g:(n>>8)&255, b:n&255};
+  }
+  function makeBg(color) {
+    try {
+      var rgb = hexToRgb(color);
+      return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.12)';
+    } catch(e) { return 'rgba(0,0,0,0.08)'; }
+  }
+  function normalizeCategories(cats) {
+    var base = (cats && cats.length) ? cats : DEFAULT_CATEGORIES;
+    return base.map(function(c){
+      var col = c.color || '#999999';
+      return {
+        key: c.key || slugify(c.label || 'tag'),
+        label: c.label || 'Tag',
+        color: col,
+        bg: c.bg || makeBg(col)
+      };
+    });
+  }
+  function slugify(s) {
+    return (s || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'tag';
+  }
+  function getCat(key) { return categories.find(function(c){ return c.key === key; }) || null; }
+  function fmtMinutes(mins) {
+    if (!mins || mins <= 0) return '';
+    var h = Math.floor(mins / 60);
+    var m = mins % 60;
+    if (h && m) return h + 'h ' + m + 'm';
+    if (h) return h + 'h';
+    return m + 'm';
+  }
+  function applyTheme() {
+    var isDark = settings.theme === 'dark';
+    document.body.classList.toggle('dark', isDark);
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute('content', isDark ? '#0f1216' : '#f8f6f2');
+  }
 
   function nextKey(k) { var m = parseKey(k); m.setDate(m.getDate()+7); return toKey(m); }
   function prevKeyOf(k) { var m = parseKey(k); m.setDate(m.getDate()-7); return toKey(m); }
@@ -640,7 +889,9 @@
           recur: t.recur,
           recurSrcId: t.id,
           recurSrcWeek: wk,
-          subtasks: []
+          subtasks: [],
+          est: t.est || null,
+          notes: t.notes || ''
         });
       });
     });
@@ -671,13 +922,16 @@
       priority: selPri,
       category: selCat,
       recur: selRecur,
-      subtasks: []
+      subtasks: [],
+      est: selEst || null,
+      notes: ''
     });
     save();
     inp.value = '';
     selPri = null;
     selCat = null;
     selRecur = null;
+    selEst = null;
 
     // If added to a different week, show feedback
     if (addWeek !== weekKey) {
@@ -700,6 +954,26 @@
     var t = wt().find(function(x){return x.id===id;});
     if (t && !t.movedTo) t.done = !t.done;
     save(); render();
+  }
+
+  function duplicateTask(id) {
+    var t = wt().find(function(x){return x.id===id;});
+    if (!t || t.movedTo) return;
+    var copy = JSON.parse(JSON.stringify(t));
+    copy.id = uid();
+    copy.done = false;
+    copy.at = Date.now();
+    copy.movedTo = null;
+    copy.rolledFrom = null;
+    copy.originalId = null;
+    if (!allTasks[weekKey]) allTasks[weekKey] = [];
+    allTasks[weekKey].push(copy);
+    save(); render();
+  }
+
+  function toggleNote(id) {
+    noteOpen[id] = !noteOpen[id];
+    render();
   }
 
   function del(id) {
@@ -752,8 +1026,10 @@
       text: t.text,
       day: t.day,
       priority: t.priority || null,
-      category: t.category || null,
-      recur: t.recur || null
+      category: getCat(t.category) ? t.category : null,
+      recur: t.recur || null,
+      notes: t.notes || '',
+      est: t.est || null
     };
     renderEditModal();
     document.getElementById('editMo').classList.add('vis');
@@ -774,6 +1050,8 @@
     t.priority = editTaskState.priority;
     t.category = editTaskState.category;
     t.recur = editTaskState.recur;
+    t.notes = editTaskState.notes || '';
+    t.est = editTaskState.est || null;
     save();
     closeEditModal();
     render();
@@ -808,7 +1086,7 @@
     // Category
     h += '<div class="edit-field"><label class="edit-label">Tag</label><div class="edit-opts">';
     h += '<button class="edit-opt' + (s.category===null?' act':'') + '" data-ecat="none" style="' + (s.category===null?'background:var(--accent);border-color:var(--accent)':'') + '">None</button>';
-    CATEGORIES.forEach(function(c){
+    categories.forEach(function(c){
       var isAct = s.category===c.key;
       h += '<button class="edit-opt' + (isAct?' act':'') + '" data-ecat="'+c.key+'" style="' + (isAct?'background:'+c.color+';border-color:'+c.color:'') + '">' + c.label + '</button>';
     });
@@ -822,6 +1100,14 @@
       h += '<button class="edit-opt' + (isAct?' act':'') + '" data-erec="'+r.key+'" style="' + (isAct?'background:var(--green);border-color:var(--green)':'') + '">' + r.label + '</button>';
     });
     h += '</div></div>';
+
+    // Notes
+    h += '<div class="edit-field"><label class="edit-label">Notes</label>';
+    h += '<textarea class="edit-text-input" id="editNotesInput" rows="3" placeholder="Add details...">' + esc(s.notes || '') + '</textarea></div>';
+
+    // Estimate
+    h += '<div class="edit-field"><label class="edit-label">Time Estimate (minutes)</label>';
+    h += '<input class="edit-text-input" id="editEstInput" type="number" min="0" step="5" value="' + (s.est ? s.est : '') + '" placeholder="e.g. 30"></div>';
 
     // Actions
     h += '<div class="edit-actions">';
@@ -851,6 +1137,17 @@
     if (txtInput) {
       txtInput.oninput = function(){ editTaskState.text = this.value; };
       txtInput.onkeydown = function(e){ if(e.key==='Enter') saveEditModal(); };
+    }
+    var notesInput = document.getElementById('editNotesInput');
+    if (notesInput) {
+      notesInput.oninput = function(){ editTaskState.notes = this.value; };
+    }
+    var estInput = document.getElementById('editEstInput');
+    if (estInput) {
+      estInput.oninput = function(){
+        var v = parseInt(this.value, 10);
+        editTaskState.est = isNaN(v) ? null : v;
+      };
     }
   }
 
@@ -1023,6 +1320,29 @@
     render();
   }
 
+  // --- Swipe on tasks ---
+  function handleTaskSwipeStart(e) {
+    if (touchDragId) return;
+    if (e.target.closest('.drag-handle')) return;
+    var ti = e.currentTarget;
+    swipeInfo = {
+      id: ti.getAttribute('data-taskid'),
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    };
+  }
+  function handleTaskSwipeEnd(e) {
+    if (!swipeInfo) return;
+    var dx = e.changedTouches[0].clientX - swipeInfo.x;
+    var dy = e.changedTouches[0].clientY - swipeInfo.y;
+    var id = swipeInfo.id;
+    swipeInfo = null;
+    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx > 0) toggle(id);
+      else del(id);
+    }
+  }
+
   // --- Rollover ---
   function prevKey() { return prevKeyOf(weekKey); }
 
@@ -1058,7 +1378,9 @@
         priority: t.priority || null,
         category: t.category || null,
         subtasks: t.subtasks ? JSON.parse(JSON.stringify(t.subtasks)) : [],
-        recur: t.recur || null
+        recur: t.recur || null,
+        est: t.est || null,
+        notes: t.notes || ''
       });
     });
 
@@ -1092,6 +1414,7 @@
 
   // --- Render Add Bar Options ---
   function renderAddBar() {
+    if (selCat && !getCat(selCat)) selCat = null;
     // Priority row
     var ph = '<span class="opt-lbl">Priority:</span><button class="opt-btn' + (selPri===null?' act':'') + '" data-pri="none">None</button>';
     PRIORITIES.forEach(function(p){
@@ -1104,7 +1427,7 @@
 
     // Category row
     var ch = '<span class="opt-lbl">Tag:</span><button class="opt-btn'+(selCat===null?' act':'')+'" data-cat="none">None</button>';
-    CATEGORIES.forEach(function(c){
+    categories.forEach(function(c){
       ch += '<button class="opt-btn'+(selCat===c.key?' act':'')+'" data-cat="'+c.key+'" style="'+(selCat===c.key?'background:'+c.color+';border-color:'+c.color+';color:#fff':'')+'">'+c.label+'</button>';
     });
     // Recurrence
@@ -1145,6 +1468,346 @@
     if (dpc) {
       dpc.onclick = function(){ targetDate = null; renderAddBar(); };
     }
+
+    // Estimate row
+    var eh = '<span class="est-label">Estimate:</span>' +
+      '<input class="est-input" id="estInput" type="number" min="0" step="5" placeholder="mins" value="' + (selEst ? selEst : '') + '">';
+    document.getElementById('estRow').innerHTML = eh;
+    var ei = document.getElementById('estInput');
+    if (ei) {
+      ei.oninput = function(){
+        var v = parseInt(this.value, 10);
+        selEst = isNaN(v) ? null : v;
+      };
+    }
+  }
+
+  // --- Search ---
+  function searchTasks(q) {
+    searchQuery = (q || '').trim().toLowerCase();
+    if (searchQuery.length < 2) {
+      searchResults = [];
+      renderSearchResults();
+      return;
+    }
+    var results = [];
+    Object.keys(allTasks).forEach(function(wk){
+      (allTasks[wk] || []).forEach(function(t){
+        var hay = (t.text || '') + ' ' + (t.notes || '');
+        if (hay.toLowerCase().indexOf(searchQuery) >= 0) {
+          results.push({
+            id: t.id,
+            text: t.text,
+            notes: t.notes || '',
+            week: wk,
+            day: t.day,
+            done: t.done,
+            movedTo: t.movedTo || null
+          });
+        }
+      });
+    });
+    results.sort(function(a,b){
+      return parseKey(b.week).getTime() - parseKey(a.week).getTime();
+    });
+    searchResults = results;
+    renderSearchResults();
+  }
+
+  function renderSearchResults() {
+    var wrap = document.getElementById('searchResults');
+    if (!wrap) return;
+    if (searchQuery.length < 2) {
+      wrap.classList.remove('vis');
+      wrap.innerHTML = '';
+      return;
+    }
+    if (searchResults.length === 0) {
+      wrap.innerHTML = '<div class="sr-empty">No matches</div>';
+      wrap.classList.add('vis');
+      return;
+    }
+    wrap.innerHTML = searchResults.slice(0, 40).map(function(r){
+      var day = r.day==null ? 'General' : DAYS[r.day];
+      var moved = r.movedTo ? ' • moved' : '';
+      return '<div class="sr-item" data-srid="'+r.id+'" data-srweek="'+r.week+'" data-srday="'+(r.day==null?'':r.day)+'">' +
+        '<div class="sr-title">'+esc(r.text)+'</div>' +
+        '<div class="sr-meta">'+weekRange(r.week)+' • '+day+(r.done?' • done':'')+moved+'</div>' +
+      '</div>';
+    }).join('');
+    wrap.classList.add('vis');
+    document.querySelectorAll('.sr-item').forEach(function(el){
+      el.onclick = function(){
+        var wk = this.getAttribute('data-srweek');
+        var day = this.getAttribute('data-srday');
+        weekKey = wk;
+        selDay = day==='' ? null : +day;
+        highlightId = this.getAttribute('data-srid');
+        searchQuery = '';
+        var inp = document.getElementById('searchInput');
+        if (inp) inp.value = '';
+        renderSearchResults();
+        render();
+      };
+    });
+  }
+
+  // --- Insights / Stats ---
+  function getWeekStats(wk) {
+    var tasks = (allTasks[wk] || []).filter(function(t){ return !t.movedTo; });
+    var total = tasks.length;
+    var done = tasks.filter(function(t){ return t.done; }).length;
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return {total: total, done: done, pct: pct};
+  }
+  function getAllKeys() {
+    var keys = Object.keys(allTasks || {});
+    if (keys.indexOf(weekKey) === -1) keys.push(weekKey);
+    return keys.sort(function(a,b){ return parseKey(a).getTime() - parseKey(b).getTime(); });
+  }
+  function completionClass(pct) {
+    if (pct >= 80) return 'dot-good';
+    if (pct >= 50) return 'dot-ok';
+    if (pct > 0) return 'dot-low';
+    return '';
+  }
+  function getWeeksForMonth(d) {
+    var year = d.getFullYear();
+    var month = d.getMonth();
+    var first = new Date(year, month, 1);
+    var last = new Date(year, month + 1, 0);
+    var start = getMonday(first);
+    var weeks = [];
+    var cur = new Date(start);
+    while (cur <= last) {
+      weeks.push(toKey(cur));
+      cur.setDate(cur.getDate() + 7);
+    }
+    return weeks;
+  }
+  function renderInsights() {
+    var cur = getWeekStats(weekKey);
+    var keys = getAllKeys();
+    var allTasksArr = [];
+    keys.forEach(function(k){
+      (allTasks[k] || []).forEach(function(t){ if (!t.movedTo) allTasksArr.push(t); });
+    });
+    var allDone = allTasksArr.filter(function(t){ return t.done; }).length;
+    var allTotal = allTasksArr.length;
+    var allPct = allTotal ? Math.round((allDone / allTotal) * 100) : 0;
+
+    // Streaks
+    var currentStreak = 0;
+    var wkCur = weekKey;
+    for (var i=0; i<52; i++) {
+      var s = getWeekStats(wkCur);
+      if (s.total === 0 || s.done < s.total) break;
+      currentStreak++;
+      wkCur = prevKeyOf(wkCur);
+    }
+    var bestStreak = 0, temp = 0;
+    keys.slice().reverse().forEach(function(k){
+      var s = getWeekStats(k);
+      if (s.total > 0 && s.done === s.total) { temp++; bestStreak = Math.max(bestStreak, temp); }
+      else temp = 0;
+    });
+
+    // Last 8 weeks
+    var weekBars = [];
+    var wkCursor = parseKey(weekKey);
+    for (var w=0; w<8; w++) {
+      var k = toKey(wkCursor);
+      var st = getWeekStats(k);
+      weekBars.push({key:k, pct:st.pct});
+      wkCursor.setDate(wkCursor.getDate()-7);
+    }
+
+    // Category / priority counts
+    var catCounts = {};
+    categories.forEach(function(c){ catCounts[c.key] = 0; });
+    var priCounts = {high:0, med:0, low:0};
+    allTasksArr.forEach(function(t){
+      if (t.category && catCounts.hasOwnProperty(t.category)) catCounts[t.category]++;
+      if (t.priority && priCounts.hasOwnProperty(t.priority)) priCounts[t.priority]++;
+    });
+
+    // Month summary
+    var monthWeeks = getWeeksForMonth(parseKey(weekKey));
+    var monthLabel = parseKey(weekKey).toLocaleDateString('en-AU', {month:'long', year:'numeric'});
+
+    var h = '';
+    h += '<div class="ins-hd"><div class="ins-title">Insights</div><button class="ins-close" id="insClose">✕</button></div>';
+
+    h += '<div class="ins-section"><h3>This Week</h3><div class="stat-grid">';
+    h += '<div class="stat-card"><div class="stat-val">'+cur.done+'/'+cur.total+'</div><div class="stat-lbl">Completed</div></div>';
+    h += '<div class="stat-card"><div class="stat-val">'+cur.pct+'%</div><div class="stat-lbl">Completion</div></div>';
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>All Time</h3><div class="stat-grid">';
+    h += '<div class="stat-card"><div class="stat-val">'+allDone+'/'+allTotal+'</div><div class="stat-lbl">Completed</div></div>';
+    h += '<div class="stat-card"><div class="stat-val">'+allPct+'%</div><div class="stat-lbl">Completion</div></div>';
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>Streaks</h3><div class="stat-grid">';
+    h += '<div class="stat-card"><div class="stat-val">'+currentStreak+'</div><div class="stat-lbl">Current (weeks)</div></div>';
+    h += '<div class="stat-card"><div class="stat-val">'+bestStreak+'</div><div class="stat-lbl">Best (weeks)</div></div>';
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>Completion (Last 8 Weeks)</h3><div class="week-bars">';
+    weekBars.forEach(function(wb){
+      h += '<div class="week-bar"><span>'+weekRange(wb.key)+'</span><div class="bar"><div class="bar-fill" style="width:'+wb.pct+'%"></div></div><span>'+wb.pct+'%</span></div>';
+    });
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>Tags & Priority</h3>';
+    h += '<div class="stat-grid">';
+    categories.forEach(function(c){
+      h += '<div class="stat-card"><div class="stat-val">'+(catCounts[c.key]||0)+'</div><div class="stat-lbl">'+esc(c.label)+'</div></div>';
+    });
+    h += '</div>';
+    h += '<div class="stat-grid" style="margin-top:8px">';
+    h += '<div class="stat-card"><div class="stat-val">'+priCounts.high+'</div><div class="stat-lbl">High</div></div>';
+    h += '<div class="stat-card"><div class="stat-val">'+priCounts.med+'</div><div class="stat-lbl">Med</div></div>';
+    h += '<div class="stat-card"><div class="stat-val">'+priCounts.low+'</div><div class="stat-lbl">Low</div></div>';
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>Week Summary ('+monthLabel+')</h3>';
+    h += '<div class="month-grid">';
+    monthWeeks.forEach(function(k){
+      var st = getWeekStats(k);
+      var dotCls = completionClass(st.pct);
+      h += '<div class="month-cell">'+fmtShort(parseKey(k))+'<div class="month-dot '+dotCls+'"></div></div>';
+    });
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>Theme</h3><div class="theme-toggle">';
+    h += '<span>Dark mode</span><div class="toggle'+(settings.theme==='dark'?' on':'')+'" id="themeToggle"></div></div></div>';
+
+    h += '<div class="ins-section"><h3>Backup</h3><div class="ins-actions">';
+    h += '<button class="ins-btn primary" id="exportBtn">Download Backup</button>';
+    h += '<button class="ins-btn" id="importBtn">Import Backup</button>';
+    h += '</div></div>';
+
+    h += '<div class="ins-section"><h3>Manage Tags</h3>';
+    categories.forEach(function(c){
+      h += '<div class="tag-row">' +
+        '<input class="tag-color" type="color" value="'+c.color+'" data-catcolor="'+c.key+'">' +
+        '<input class="tag-input" value="'+esc(c.label)+'" data-catlabel="'+c.key+'">' +
+        '<button class="tag-del" data-catdel="'+c.key+'">×</button>' +
+      '</div>';
+    });
+    h += '<div class="tag-add">' +
+      '<input class="tag-color" type="color" value="#7c5cdb" id="newCatColor">' +
+      '<input class="tag-input" placeholder="New tag name" id="newCatLabel">' +
+      '<button class="tag-add-btn" id="addCatBtn">Add</button>' +
+    '</div></div>';
+
+    document.getElementById('insMdInner').innerHTML = h;
+
+    document.getElementById('insClose').onclick = closeInsights;
+    document.getElementById('themeToggle').onclick = function(){
+      settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      save();
+      renderInsights();
+    };
+    document.getElementById('exportBtn').onclick = exportData;
+    document.getElementById('importBtn').onclick = function(){ document.getElementById('importFile').click(); };
+
+    document.querySelectorAll('[data-catlabel]').forEach(function(el){
+      el.oninput = function(){
+        var key = this.getAttribute('data-catlabel');
+        var cat = getCat(key);
+        if (cat) {
+          cat.label = this.value || cat.label;
+          save();
+          render();
+          renderInsights();
+        }
+      };
+    });
+    document.querySelectorAll('[data-catcolor]').forEach(function(el){
+      el.oninput = function(){
+        var key = this.getAttribute('data-catcolor');
+        var cat = getCat(key);
+        if (cat) {
+          cat.color = this.value;
+          cat.bg = makeBg(this.value);
+          save();
+          render();
+          renderInsights();
+        }
+      };
+    });
+    document.querySelectorAll('[data-catdel]').forEach(function(el){
+      el.onclick = function(){
+        var key = this.getAttribute('data-catdel');
+        if (!confirm('Delete this tag? Tasks using it will be untagged.')) return;
+        categories = categories.filter(function(c){ return c.key !== key; });
+        Object.keys(allTasks).forEach(function(wk){
+          (allTasks[wk] || []).forEach(function(t){ if (t.category === key) t.category = null; });
+        });
+        save(); render(); renderInsights();
+      };
+    });
+    var addBtn = document.getElementById('addCatBtn');
+    if (addBtn) {
+      addBtn.onclick = function(){
+        var lbl = (document.getElementById('newCatLabel').value || '').trim();
+        var col = document.getElementById('newCatColor').value || '#7c5cdb';
+        if (!lbl) return;
+        var key = slugify(lbl);
+        var suffix = 1;
+        while (getCat(key)) { key = key + '-' + suffix; suffix++; }
+        categories.push({key:key, label:lbl, color:col, bg:makeBg(col)});
+        document.getElementById('newCatLabel').value = '';
+        save(); render(); renderInsights();
+      };
+    }
+  }
+
+  function openInsights() {
+    renderInsights();
+    document.getElementById('insMo').classList.add('vis');
+  }
+  function closeInsights() {
+    document.getElementById('insMo').classList.remove('vis');
+  }
+
+  // --- Export / Import ---
+  function exportData() {
+    var payload = {
+      version: 2,
+      tasks: allTasks,
+      categories: categories,
+      settings: settings
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var d = new Date();
+    var name = 'weekly-tasks-backup-' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + '.json';
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+  }
+  function importDataFromObject(obj) {
+    if (!obj) return false;
+    if (obj.tasks) {
+      allTasks = obj.tasks || {};
+      categories = normalizeCategories(obj.categories || []);
+      settings = Object.assign({theme:'light'}, obj.settings || {});
+      save(); applyTheme(); render();
+      return true;
+    }
+    if (typeof obj === 'object') {
+      allTasks = obj;
+      categories = normalizeCategories(DEFAULT_CATEGORIES);
+      settings = {theme:'light'};
+      save(); applyTheme(); render();
+      return true;
+    }
+    return false;
   }
 
   // --- Render ---
@@ -1166,12 +1829,14 @@
     // Progress (exclude moved tasks from count)
     var activeTasks = tasks.filter(function(t){ return !t.movedTo; });
     var total = activeTasks.length, done = activeTasks.filter(function(t){return t.done;}).length;
+    var estSrc = selDay===null ? activeTasks : activeTasks.filter(function(t){ return t.day===selDay; });
+    var estTotal = estSrc.reduce(function(sum, t){ return sum + (t.est || 0); }, 0);
     var pct = total > 0 ? (done/total)*100 : 0;
     document.getElementById('prg').classList.toggle('hid', total===0);
     var fill = document.getElementById('prgFill');
     fill.style.width = pct + '%';
     fill.classList.toggle('cmp', pct===100);
-    document.getElementById('prgTxt').textContent = done+'/'+total+' done';
+    document.getElementById('prgTxt').textContent = done+'/'+total+' done' + (estTotal>0 ? ' • Est ' + fmtMinutes(estTotal) : '');
 
     // Day filter (exclude moved)
     var html = '<button class="dp'+(selDay===null?' act':'')+'" data-day="all">All</button>';
@@ -1235,6 +1900,7 @@
         var itemCls = 'ti';
         if (isMoved) itemCls += ' moved';
         else if (t.done) itemCls += ' dn';
+        if (highlightId === t.id) itemCls += ' hi';
 
         var cbCls = 'cb';
         if (isMoved) cbCls += ' moved-cb';
@@ -1245,7 +1911,11 @@
         else if (t.done) txtCls += ' dnt';
 
         // Category info
-        var catInfo = t.category ? CATEGORIES.find(function(c){return c.key===t.category;}) : null;
+        var catInfo = t.category ? getCat(t.category) : null;
+
+        // Notes
+        var hasNotes = t.notes && t.notes.trim();
+        var showNotes = !!noteOpen[t.id];
 
         // Subtasks
         var subHtml = '';
@@ -1288,10 +1958,13 @@
               (t.day!=null && !isMoved ? '<span class="dtag">'+DAYS[t.day]+'</span>' : '') +
               (t.priority && !isMoved ? '<span class="ptag pri-'+t.priority+'">'+({high:'High',med:'Med',low:'Low'}[t.priority])+'</span>' : '') +
               (catInfo && !isMoved ? '<span class="ctag" style="background:'+catInfo.bg+';color:'+catInfo.color+'">'+catInfo.label+'</span>' : '') +
+              (t.est && !isMoved ? '<span class="etag">⏱ '+fmtMinutes(t.est)+'</span>' : '') +
               (t.recur && !isMoved ? '<span class="rectag">↻ '+({weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly',yearly:'Yearly'}[t.recur])+'</span>' : '') +
               (isRolled ? '<span class="rtag">↻ Rolled over</span>' : '') +
               (isMoved ? '<span class="mvtag">'+movedLabel+'</span>' : '') +
+              (hasNotes && !isMoved ? '<button class="note-btn" data-noteid="'+t.id+'">'+(showNotes?'Hide notes':'Notes')+'</button>' : '') +
             '</div>' +
+            (hasNotes && showNotes && !isMoved ? '<div class="note">'+esc(t.notes)+'</div>' : '') +
             subHtml +
           '</div>' +
           (isMoved
@@ -1301,6 +1974,7 @@
                 ? '<button class="db" data-uid="'+t.id+'" title="Undo rollover" style="color:#b4a0e8;font-size:16px;">↩</button>'
                 : '<button class="db" data-did="'+t.id+'">×</button>') +
               '<button class="db" data-editid="'+t.id+'" title="Edit task" style="font-size:14px;color:#bbb;">✎</button>' +
+              '<button class="db" data-dupid="'+t.id+'" title="Duplicate task" style="font-size:14px;color:#bbb;">⧉</button>' +
               '<button class="db" data-subid="'+t.id+'" title="Add subtask" style="font-size:14px;color:#bbb;">☰</button>' +
             '</div>'
           ) +
@@ -1323,8 +1997,14 @@
       document.querySelectorAll('.db[data-editid]').forEach(function(b){
         b.onclick = function(){ openEditModal(this.getAttribute('data-editid')); };
       });
+      document.querySelectorAll('.db[data-dupid]').forEach(function(b){
+        b.onclick = function(){ duplicateTask(this.getAttribute('data-dupid')); };
+      });
       document.querySelectorAll('.db[data-subid]').forEach(function(b){
         b.onclick = function(){ addSubtask(this.getAttribute('data-subid')); };
+      });
+      document.querySelectorAll('.note-btn[data-noteid]').forEach(function(b){
+        b.onclick = function(){ toggleNote(this.getAttribute('data-noteid')); };
       });
       document.querySelectorAll('.pri-dot[data-prid]').forEach(function(b){
         b.onclick = function(){ cyclePri(this.getAttribute('data-prid')); };
@@ -1354,6 +2034,10 @@
         el.addEventListener('drop', handleDrop);
         el.addEventListener('dragend', handleDragEnd);
       });
+      document.querySelectorAll('.ti[data-taskid]').forEach(function(el){
+        el.addEventListener('touchstart', handleTaskSwipeStart, {passive:true});
+        el.addEventListener('touchend', handleTaskSwipeEnd, {passive:true});
+      });
       // Touch drag
       document.querySelectorAll('.drag-handle').forEach(function(h){
         h.addEventListener('touchstart', handleTouchDragStart, {passive:false});
@@ -1365,6 +2049,14 @@
     var rbe = document.getElementById('rb');
     rbe.classList.toggle('vis', inc.length > 0);
     document.getElementById('rbb').textContent = '↻ '+inc.length+' incomplete from last week — Roll over?';
+
+    if (highlightId) {
+      var hel = document.querySelector('.ti[data-taskid="'+highlightId+'"]');
+      if (hel) {
+        hel.scrollIntoView({behavior:'smooth', block:'center'});
+        setTimeout(function(){ highlightId = null; render(); }, 2200);
+      }
+    }
   }
 
   function updBtn() {
@@ -1373,6 +2065,8 @@
 
   // --- Init ---
   load();
+  if (!categories.length) categories = normalizeCategories(DEFAULT_CATEGORIES);
+  applyTheme();
   weekKey = todayKey();
   render();
 
@@ -1389,16 +2083,52 @@
   document.getElementById('editMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('delMo').addEventListener('click', function(e){ if(e.target===this) cancelDel(); });
   document.getElementById('delMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.getElementById('insightsBtn').addEventListener('click', openInsights);
+  document.getElementById('insMo').addEventListener('click', function(e){ if(e.target===this) closeInsights(); });
+  document.getElementById('insMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
 
   var inp = document.getElementById('ai');
   inp.addEventListener('input', updBtn);
   inp.addEventListener('keydown', function(e){ if(e.key==='Enter') addTask(); });
   document.getElementById('abtn').addEventListener('click', addTask);
 
+  var sInp = document.getElementById('searchInput');
+  if (sInp) {
+    sInp.addEventListener('input', function(){ searchTasks(this.value); });
+    sInp.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { this.value=''; searchTasks(''); }
+    });
+  }
+  var sClr = document.getElementById('searchClear');
+  if (sClr) sClr.addEventListener('click', function(){
+    var si = document.getElementById('searchInput');
+    if (si) si.value = '';
+    searchTasks('');
+  });
+
+  var imp = document.getElementById('importFile');
+  if (imp) {
+    imp.addEventListener('change', function(){
+      var file = this.files && this.files[0];
+      if (!file) return;
+      if (!confirm('Import backup? This will replace your current data.')) { this.value=''; return; }
+      var reader = new FileReader();
+      reader.onload = function(){
+        try {
+          var obj = JSON.parse(reader.result);
+          if (!importDataFromObject(obj)) alert('Import failed: invalid file');
+          else { renderInsights(); }
+        } catch(e) { alert('Import failed: invalid JSON'); }
+      };
+      reader.readAsText(file);
+      this.value='';
+    });
+  }
+
   // Swipe (only if not touch-dragging)
   var tx=0, ty=0, tlEl=document.getElementById('tlist');
   tlEl.addEventListener('touchstart', function(e){
-    if (e.target.closest('.drag-handle')) return;
+    if (e.target.closest('.drag-handle') || e.target.closest('.ti')) return;
     tx=e.touches[0].clientX; ty=e.touches[0].clientY;
   }, {passive:true});
   tlEl.addEventListener('touchend', function(e){
