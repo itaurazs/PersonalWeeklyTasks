@@ -446,6 +446,7 @@
     display:flex; align-items:center; justify-content:center; box-shadow:var(--sh);
   }
   .icon-btn:active { transform:scale(0.95); }
+  .icon-btn.act { background:var(--accent); color:#fff; border-color:var(--accent); }
 
   .search-wrap {
     margin-top:8px; display:flex; gap:6px; align-items:center;
@@ -573,6 +574,38 @@
   .dot-good { background:var(--green); }
   .dot-ok { background:#eab308; }
   .dot-low { background:#e53e3e; }
+
+  /* Bulk select */
+  .sel-cb {
+    width:22px; height:22px; min-width:22px; border-radius:7px;
+    border:2px solid rgba(0,0,0,0.18); background:transparent; color:transparent;
+    font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s; margin-top:2px;
+  }
+  .sel-cb.on { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .ti.sel { border-color:var(--blue); box-shadow:0 0 0 2px rgba(59,130,246,0.2); }
+
+  .bulkbar {
+    position:fixed; bottom:calc(140px + var(--safe-b)); left:50%; transform:translateX(-50%);
+    max-width:460px; width:calc(100% - 32px); background:var(--bg-card);
+    border:1px solid var(--border); border-radius:14px; padding:10px 12px;
+    box-shadow:var(--sh-lg); display:none; z-index:25;
+  }
+  .bulkbar.vis { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .bulk-count { font-size:12px; color:var(--text-muted); font-weight:600; margin-right:4px; }
+  .bulk-btn {
+    padding:7px 10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); font-size:12px; cursor:pointer; color:var(--text-sec);
+  }
+  .bulk-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .bulk-btn.danger { background:#e53e3e; color:#fff; border-color:#e53e3e; }
+
+  /* Reminders */
+  .rem-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .rem-input, .rem-select {
+    padding:6px 8px; background:var(--bg); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-size:12px; font-family:inherit;
+  }
 </style>
 </head>
 <body>
@@ -582,6 +615,7 @@
       <h1 class="title">Weekly Tasks</h1>
       <div class="hdr-actions">
         <button class="today-btn" id="todayBtn">Today</button>
+        <button class="icon-btn" id="bulkBtn" title="Bulk Select">✓</button>
         <button class="icon-btn" id="insightsBtn" title="Insights & Settings">☰</button>
       </div>
     </div>
@@ -615,6 +649,8 @@
     <span class="toast-msg" id="toastMsg"></span>
     <button class="toast-undo" id="toastUndo">UNDO</button>
   </div>
+
+  <div class="bulkbar" id="bulkbar"></div>
 
   <div class="ab">
     <div class="ar">
@@ -695,6 +731,9 @@
   var highlightId = null;
   var noteOpen = {};
   var swipeInfo = null;
+  var bulkMode = false;
+  var bulkSel = {};
+  var reminderTimer = null;
 
   // --- Storage ---
   var canLS = false;
@@ -710,10 +749,12 @@
         allTasks = parsed.tasks || {};
         categories = normalizeCategories(parsed.categories || []);
         settings = Object.assign({theme:'light'}, parsed.settings || {});
+        ensureReminders();
       } else if (parsed && typeof parsed === 'object') {
         allTasks = parsed;
         categories = normalizeCategories(DEFAULT_CATEGORIES);
         settings = {theme:'light'};
+        ensureReminders();
         save();
       }
     } catch(e) {}
@@ -798,6 +839,17 @@
     var themeMeta = document.querySelector('meta[name="theme-color"]');
     if (themeMeta) themeMeta.setAttribute('content', isDark ? '#0f1216' : '#f8f6f2');
   }
+  function ensureReminders() {
+    if (!settings.reminders) {
+      settings.reminders = {
+        enabled: false,
+        cadence: 'daily',
+        time: '09:00',
+        days: [1,2,3,4,5],
+        lastSent: ''
+      };
+    }
+  }
 
   function nextKey(k) { var m = parseKey(k); m.setDate(m.getDate()+7); return toKey(m); }
   function prevKeyOf(k) { var m = parseKey(k); m.setDate(m.getDate()-7); return toKey(m); }
@@ -837,9 +889,10 @@
     mon.setDate(mon.getDate() + dir * 7);
     weekKey = toKey(mon);
     selDay = null;
+    bulkSel = {};
     render();
   }
-  function goToday() { weekKey = todayKey(); selDay = null; render(); }
+  function goToday() { weekKey = todayKey(); selDay = null; bulkSel = {}; render(); }
 
   // --- Recurring tasks ---
   function generateRecurring() {
@@ -974,6 +1027,90 @@
   function toggleNote(id) {
     noteOpen[id] = !noteOpen[id];
     render();
+  }
+
+  // --- Bulk actions ---
+  function toggleBulkMode() {
+    bulkMode = !bulkMode;
+    if (!bulkMode) bulkSel = {};
+    render();
+  }
+  function toggleBulkSelect(id) {
+    if (bulkSel[id]) delete bulkSel[id];
+    else bulkSel[id] = true;
+    renderBulkBar();
+    render();
+  }
+  function clearBulkSelection() {
+    bulkSel = {};
+    renderBulkBar();
+    render();
+  }
+  function getSelectedTasks() {
+    var ids = Object.keys(bulkSel);
+    return wt().filter(function(t){ return ids.indexOf(t.id) >= 0; });
+  }
+  function bulkComplete() {
+    getSelectedTasks().forEach(function(t){ if (!t.movedTo) t.done = true; });
+    save(); clearBulkSelection();
+  }
+  function bulkDelete() {
+    var cnt = Object.keys(bulkSel).length;
+    if (!cnt) return;
+    if (!confirm('Delete '+cnt+' selected tasks?')) return;
+    var ids = Object.keys(bulkSel);
+    allTasks[weekKey] = wt().filter(function(t){ return ids.indexOf(t.id) === -1; });
+    save(); clearBulkSelection();
+    showToast(cnt + ' tasks deleted');
+  }
+  function bulkTag(key) {
+    getSelectedTasks().forEach(function(t){ t.category = key || null; });
+    save(); clearBulkSelection();
+  }
+  function bulkMove() {
+    var raw = prompt('Move to week starting (YYYY-MM-DD). Leave empty for next week.');
+    if (raw === null) return;
+    var target = raw.trim() ? new Date(raw.trim()) : parseKey(nextKey(weekKey));
+    if (isNaN(target.getTime())) { alert('Invalid date. Use YYYY-MM-DD.'); return; }
+    var tk = toKey(target);
+    if (!allTasks[tk]) allTasks[tk] = [];
+    var ids = Object.keys(bulkSel);
+    var moving = wt().filter(function(t){ return ids.indexOf(t.id) >= 0; });
+    allTasks[weekKey] = wt().filter(function(t){ return ids.indexOf(t.id) === -1; });
+    moving.forEach(function(t){
+      t.day = null;
+      allTasks[tk].push(t);
+    });
+    save(); clearBulkSelection();
+    weekKey = tk;
+    render();
+  }
+  function renderBulkBar() {
+    var bar = document.getElementById('bulkbar');
+    if (!bar) return;
+    var cnt = Object.keys(bulkSel).length;
+    if (!bulkMode || cnt === 0) { bar.classList.remove('vis'); bar.innerHTML = ''; return; }
+    var tagOptions = '<option value="">Tag: none</option>' + categories.map(function(c){
+      return '<option value="'+c.key+'">'+esc(c.label)+'</option>';
+    }).join('');
+    bar.innerHTML =
+      '<span class="bulk-count">'+cnt+' selected</span>' +
+      '<button class="bulk-btn primary" id="bulkComplete">Complete</button>' +
+      '<button class="bulk-btn danger" id="bulkDelete">Delete</button>' +
+      '<button class="bulk-btn" id="bulkMove">Move</button>' +
+      '<select class="rem-select" id="bulkTag">'+tagOptions+'</select>' +
+      '<button class="bulk-btn" id="bulkTagApply">Apply Tag</button>' +
+      '<button class="bulk-btn" id="bulkClear">Clear</button>';
+    bar.classList.add('vis');
+
+    document.getElementById('bulkComplete').onclick = bulkComplete;
+    document.getElementById('bulkDelete').onclick = bulkDelete;
+    document.getElementById('bulkMove').onclick = bulkMove;
+    document.getElementById('bulkTagApply').onclick = function(){
+      var key = document.getElementById('bulkTag').value;
+      bulkTag(key || null);
+    };
+    document.getElementById('bulkClear').onclick = clearBulkSelection;
   }
 
   function del(id) {
@@ -1542,6 +1679,7 @@
         var day = this.getAttribute('data-srday');
         weekKey = wk;
         selDay = day==='' ? null : +day;
+        bulkSel = {};
         highlightId = this.getAttribute('data-srid');
         searchQuery = '';
         var inp = document.getElementById('searchInput');
@@ -1550,6 +1688,50 @@
         render();
       };
     });
+  }
+
+  // --- Reminders (when app is open) ---
+  function requestNotificationPermission(cb) {
+    if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
+    if (Notification.permission === 'granted') { if (cb) cb(); return; }
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted' && cb) cb();
+    });
+  }
+  function sendReminderNotification() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    var pending = (allTasks[weekKey] || []).filter(function(t){ return !t.done && !t.movedTo; }).length;
+    var body = pending > 0 ? (pending + ' tasks to finish this week.') : 'You are all caught up.';
+    try { new Notification('Weekly Tasks', { body: body }); } catch(e) {}
+  }
+  function shouldFireReminder(now) {
+    ensureReminders();
+    var r = settings.reminders;
+    if (!r.enabled) return false;
+    var hh = String(now.getHours()).padStart(2,'0');
+    var mm = String(now.getMinutes()).padStart(2,'0');
+    var t = hh + ':' + mm;
+    if (t !== r.time) return false;
+    var today = now.toISOString().slice(0,10);
+    if (r.lastSent === today) return false;
+    if (r.cadence === 'daily') return true;
+    if (r.cadence === 'weekly') {
+      var dow = now.getDay(); // 0=Sun
+      var idx = dow === 0 ? 7 : dow; // 1=Mon..7=Sun
+      return r.days && r.days.indexOf(idx) >= 0;
+    }
+    return false;
+  }
+  function startReminderLoop() {
+    if (reminderTimer) clearInterval(reminderTimer);
+    reminderTimer = setInterval(function(){
+      if (shouldFireReminder(new Date())) {
+        settings.reminders.lastSent = new Date().toISOString().slice(0,10);
+        save();
+        sendReminderNotification();
+      }
+    }, 30000);
   }
 
   // --- Insights / Stats ---
@@ -1586,6 +1768,7 @@
     return weeks;
   }
   function renderInsights() {
+    ensureReminders();
     var cur = getWeekStats(weekKey);
     var keys = getAllKeys();
     var allTasksArr = [];
@@ -1683,6 +1866,25 @@
     h += '<div class="ins-section"><h3>Theme</h3><div class="theme-toggle">';
     h += '<span>Dark mode</span><div class="toggle'+(settings.theme==='dark'?' on':'')+'" id="themeToggle"></div></div></div>';
 
+    var r = settings.reminders;
+    h += '<div class="ins-section"><h3>Reminders (when app is open)</h3>';
+    h += '<div class="rem-row">';
+    h += '<button class="ins-btn'+(r.enabled?' primary':'')+'" id="remEnable">'+(r.enabled?'Enabled':'Enable')+'</button>';
+    h += '<select class="rem-select" id="remCadence">' +
+      '<option value="daily"'+(r.cadence==='daily'?' selected':'')+'>Daily</option>' +
+      '<option value="weekly"'+(r.cadence==='weekly'?' selected':'')+'>Weekly</option>' +
+    '</select>';
+    h += '<input class="rem-input" id="remTime" type="time" value="'+(r.time||'09:00')+'">';
+    h += '<button class="ins-btn" id="remTest">Test</button>';
+    h += '</div>';
+    h += '<div class="rem-row" style="margin-top:6px">';
+    DAYS.forEach(function(d, i){
+      var idx = i + 1;
+      var on = r.days && r.days.indexOf(idx) >= 0;
+      h += '<button class="ins-btn'+(on?' primary':'')+'" data-remday="'+idx+'">'+d+'</button>';
+    });
+    h += '</div></div>';
+
     h += '<div class="ins-section"><h3>Backup</h3><div class="ins-actions">';
     h += '<button class="ins-btn primary" id="exportBtn">Download Backup</button>';
     h += '<button class="ins-btn" id="importBtn">Import Backup</button>';
@@ -1711,6 +1913,37 @@
       save();
       renderInsights();
     };
+    document.getElementById('remEnable').onclick = function(){
+      settings.reminders.enabled = !settings.reminders.enabled;
+      if (settings.reminders.enabled) {
+        requestNotificationPermission(function(){
+          save(); startReminderLoop(); renderInsights();
+        });
+      } else {
+        save(); renderInsights();
+      }
+    };
+    document.getElementById('remCadence').onchange = function(){
+      settings.reminders.cadence = this.value;
+      save(); renderInsights();
+    };
+    document.getElementById('remTime').onchange = function(){
+      settings.reminders.time = this.value || '09:00';
+      save();
+    };
+    document.getElementById('remTest').onclick = function(){
+      requestNotificationPermission(function(){ sendReminderNotification(); });
+    };
+    document.querySelectorAll('[data-remday]').forEach(function(b){
+      b.onclick = function(){
+        var idx = +this.getAttribute('data-remday');
+        var days = settings.reminders.days || [];
+        if (days.indexOf(idx) >= 0) days = days.filter(function(x){ return x !== idx; });
+        else days.push(idx);
+        settings.reminders.days = days;
+        save(); renderInsights();
+      };
+    });
     document.getElementById('exportBtn').onclick = exportData;
     document.getElementById('importBtn').onclick = function(){ document.getElementById('importFile').click(); };
 
@@ -1797,6 +2030,7 @@
       allTasks = obj.tasks || {};
       categories = normalizeCategories(obj.categories || []);
       settings = Object.assign({theme:'light'}, obj.settings || {});
+      ensureReminders();
       save(); applyTheme(); render();
       return true;
     }
@@ -1804,6 +2038,7 @@
       allTasks = obj;
       categories = normalizeCategories(DEFAULT_CATEGORIES);
       settings = {theme:'light'};
+      ensureReminders();
       save(); applyTheme(); render();
       return true;
     }
@@ -1825,6 +2060,7 @@
     else { bdg.textContent = wd===-1 ? 'Last Week' : Math.abs(wd)+' Weeks Ago'; bdg.className = 'wbdg pst'; }
 
     document.getElementById('todayBtn').classList.toggle('vis', !isCur);
+    document.getElementById('bulkBtn').classList.toggle('act', bulkMode);
 
     // Progress (exclude moved tasks from count)
     var activeTasks = tasks.filter(function(t){ return !t.movedTo; });
@@ -1900,6 +2136,7 @@
         var itemCls = 'ti';
         if (isMoved) itemCls += ' moved';
         else if (t.done) itemCls += ' dn';
+        if (bulkMode && bulkSel[t.id]) itemCls += ' sel';
         if (highlightId === t.id) itemCls += ' hi';
 
         var cbCls = 'cb';
@@ -1947,8 +2184,12 @@
 
         // Drag handle
         var dragH = isMoved ? '' : '<span class="drag-handle" draggable="true">⋮⋮</span>';
+        var bulkCb = (!isMoved && bulkMode)
+          ? '<button class="sel-cb'+(bulkSel[t.id]?' on':'')+'" data-selid="'+t.id+'">'+(bulkSel[t.id]?'✓':'')+'</button>'
+          : '';
 
         return '<div class="'+itemCls+'" data-taskid="'+t.id+'" draggable="false">' +
+          (bulkCb ? bulkCb : '') +
           dragH +
           (priDot ? priDot : '') +
           '<button class="'+cbCls+'" data-tid="'+t.id+'">'+(t.done && !isMoved?'✓':'')+'</button>' +
@@ -1984,6 +2225,9 @@
       // Attach events
       document.querySelectorAll('.cb[data-tid]').forEach(function(b){
         b.onclick = function(){ toggle(this.getAttribute('data-tid')); };
+      });
+      document.querySelectorAll('.sel-cb[data-selid]').forEach(function(b){
+        b.onclick = function(){ toggleBulkSelect(this.getAttribute('data-selid')); };
       });
       document.querySelectorAll('.tt[data-eid]').forEach(function(b){
         b.onclick = function(){ startEd(this.getAttribute('data-eid')); };
@@ -2044,6 +2288,8 @@
       });
     }
 
+    renderBulkBar();
+
     // Rollover banner
     var inc = incPrev();
     var rbe = document.getElementById('rb');
@@ -2066,9 +2312,11 @@
   // --- Init ---
   load();
   if (!categories.length) categories = normalizeCategories(DEFAULT_CATEGORIES);
+  ensureReminders();
   applyTheme();
   weekKey = todayKey();
   render();
+  startReminderLoop();
 
   document.getElementById('prevBtn').addEventListener('click', function(){ go(-1); });
   document.getElementById('nextBtn').addEventListener('click', function(){ go(1); });
@@ -2083,6 +2331,7 @@
   document.getElementById('editMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('delMo').addEventListener('click', function(e){ if(e.target===this) cancelDel(); });
   document.getElementById('delMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.getElementById('bulkBtn').addEventListener('click', toggleBulkMode);
   document.getElementById('insightsBtn').addEventListener('click', openInsights);
   document.getElementById('insMo').addEventListener('click', function(e){ if(e.target===this) closeInsights(); });
   document.getElementById('insMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
