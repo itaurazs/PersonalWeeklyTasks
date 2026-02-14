@@ -251,6 +251,103 @@
 
   .rst { text-align:center; padding:8px 0 16px; }
   .rstb { background:none; border:none; color:#ccc; font-size:11px; cursor:pointer; font-family:inherit; text-decoration:underline; }
+
+  /* UNDO TOAST */
+  .toast {
+    position:fixed; bottom:calc(160px + var(--safe-b)); left:50%; transform:translateX(-50%) translateY(20px);
+    background:#333; color:#fff; padding:12px 18px; border-radius:var(--r);
+    font-size:13px; font-weight:500; z-index:60; display:none; align-items:center; gap:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.25); max-width:360px; width:calc(100% - 40px);
+    animation:toastIn 0.25s ease-out;
+  }
+  .toast.vis { display:flex; }
+  @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(30px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+  .toast-msg { flex:1; }
+  .toast-undo {
+    background:none; border:none; color:var(--accent); font-size:13px; font-weight:700;
+    cursor:pointer; font-family:inherit; text-transform:uppercase; white-space:nowrap;
+  }
+  .toast-undo:active { opacity:0.7; }
+
+  /* PRIORITY INDICATOR */
+  .pri-dot {
+    width:8px; height:8px; min-width:8px; border-radius:50%; margin-top:9px;
+  }
+  .pri-dot.pri-high { background:#e53e3e; box-shadow:0 0 6px rgba(229,62,62,0.4); }
+  .pri-dot.pri-med { background:#eab308; box-shadow:0 0 6px rgba(234,179,8,0.3); }
+  .pri-dot.pri-low { background:#60a5fa; box-shadow:0 0 6px rgba(96,165,250,0.3); }
+  .ptag { font-size:10px; padding:2px 7px; border-radius:6px; font-weight:600; }
+  .ptag.pri-high { background:rgba(229,62,62,0.1); color:#e53e3e; }
+  .ptag.pri-med { background:rgba(234,179,8,0.1); color:#b8960a; }
+  .ptag.pri-low { background:rgba(96,165,250,0.1); color:#3b82f6; }
+
+  /* CATEGORY TAGS */
+  .ctag { font-size:10px; padding:2px 7px; border-radius:6px; font-weight:600; }
+
+  /* PRIORITY/CATEGORY SELECTORS IN ADD BAR */
+  .add-opts { display:flex; gap:4px; overflow-x:auto; align-items:center; padding-bottom:2px; margin-top:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .add-opts::-webkit-scrollbar { display:none; }
+  .opt-lbl { font-size:11px; color:var(--text-muted); margin-right:4px; white-space:nowrap; font-weight:500; }
+  .opt-btn {
+    background:var(--bg-card); border:1px solid var(--border); color:var(--text-sec);
+    padding:5px 9px; border-radius:var(--r-sm); font-size:11px; cursor:pointer;
+    white-space:nowrap; font-family:inherit; flex-shrink:0; font-weight:500;
+  }
+  .opt-btn:active { transform:scale(0.93); }
+  .opt-btn.act { color:#fff; }
+  .opt-btn.pri-high-btn.act { background:#e53e3e; border-color:#e53e3e; }
+  .opt-btn.pri-med-btn.act { background:#eab308; border-color:#eab308; color:#fff; }
+  .opt-btn.pri-low-btn.act { background:#60a5fa; border-color:#60a5fa; }
+
+  /* DRAG AND DROP */
+  .drag-handle {
+    cursor:grab; color:#ccc; font-size:16px; padding:0 2px; user-select:none; -webkit-user-select:none;
+    display:flex; align-items:center; flex-shrink:0; touch-action:none;
+  }
+  .drag-handle:active { cursor:grabbing; color:#999; }
+  .ti.dragging { opacity:0.4; transform:scale(0.97); }
+  .ti.drag-over { border-top:2px solid var(--accent); margin-top:-1px; }
+
+  /* SUBTASKS */
+  .subtasks { margin-top:6px; display:flex; flex-direction:column; gap:3px; }
+  .sub-item { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-sec); }
+  .sub-cb {
+    width:16px; height:16px; min-width:16px; border-radius:4px; border:1.5px solid rgba(0,0,0,0.15);
+    background:transparent; color:transparent; font-size:9px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit;
+  }
+  .sub-cb.chk { background:var(--green); border-color:var(--green); color:#fff; }
+  .sub-txt { flex:1; min-width:0; word-break:break-word; }
+  .sub-txt.sub-done { text-decoration:line-through; color:var(--text-muted); }
+  .sub-del { background:none; border:none; color:#ddd; font-size:14px; cursor:pointer; padding:0 2px; font-family:inherit; }
+  .sub-del:active { color:#e53e3e; }
+  .sub-add {
+    background:none; border:none; color:var(--text-muted); font-size:12px; cursor:pointer;
+    font-family:inherit; padding:4px 0; text-align:left;
+  }
+  .sub-add:hover { color:var(--accent); }
+  .sub-input {
+    flex:1; background:var(--bg); border:1.5px solid var(--accent); border-radius:6px;
+    font-size:12px; padding:3px 8px; font-family:inherit; color:var(--text); outline:none;
+  }
+  .sub-prog { font-size:10px; color:var(--text-muted); font-weight:600; margin-top:2px; }
+
+  /* RECURRING TAG */
+  .rectag { font-size:10px; background:rgba(34,166,110,0.1); color:var(--green); padding:2px 7px; border-radius:6px; font-weight:600; }
+
+  /* DATE PICKER FOR FUTURE TASKS */
+  .date-pick-row { display:flex; gap:4px; align-items:center; margin-top:4px; }
+  .date-pick-lbl { font-size:11px; color:var(--text-muted); margin-right:4px; white-space:nowrap; font-weight:500; }
+  .date-pick-input {
+    background:var(--bg-card); border:1px solid var(--border); color:var(--text-sec);
+    padding:5px 9px; border-radius:var(--r-sm); font-size:11px; font-family:inherit; cursor:pointer;
+  }
+  .date-pick-input:focus { border-color:var(--accent); }
+  .date-pick-clear {
+    background:none; border:none; color:var(--text-muted); font-size:14px; cursor:pointer;
+    font-family:inherit; padding:2px 4px;
+  }
+  .date-pick-week { font-size:10px; color:var(--accent); font-weight:600; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -281,12 +378,20 @@
     <button class="rbb" id="rbb"></button>
   </div>
 
+  <div class="toast" id="toast">
+    <span class="toast-msg" id="toastMsg"></span>
+    <button class="toast-undo" id="toastUndo">UNDO</button>
+  </div>
+
   <div class="ab">
     <div class="ar">
       <input class="ai" id="ai" placeholder="Add a task..." autocomplete="off">
       <button class="abtn dis" id="abtn">+</button>
     </div>
     <div class="adr" id="adr"></div>
+    <div class="add-opts" id="priRow"></div>
+    <div class="add-opts" id="catRow"></div>
+    <div class="date-pick-row" id="dateRow"></div>
   </div>
 
   <div class="mo" id="mo">
@@ -307,11 +412,30 @@
   'use strict';
 
   var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var PRIORITIES = [{key:'high',label:'High'},{key:'med',label:'Med'},{key:'low',label:'Low'}];
+  var CATEGORIES = [
+    {key:'work',label:'Work',color:'#e85d2a',bg:'rgba(232,93,42,0.1)'},
+    {key:'personal',label:'Personal',color:'#7c5cdb',bg:'rgba(124,92,219,0.1)'},
+    {key:'errands',label:'Errands',color:'#eab308',bg:'rgba(234,179,8,0.1)'},
+    {key:'health',label:'Health',color:'#22a66e',bg:'rgba(34,166,110,0.1)'},
+    {key:'finance',label:'Finance',color:'#3b82f6',bg:'rgba(59,130,246,0.1)'}
+  ];
+  var RECURRENCE = [{key:'weekly',label:'Weekly'},{key:'biweekly',label:'Biweekly'},{key:'monthly',label:'Monthly'}];
+
   var allTasks = {};
   var weekKey = '';
   var selDay = null;
+  var selPri = null;
+  var selCat = null;
+  var selRecur = null;
+  var targetDate = null; // for future date task creation
   var editId = null;
   var rollSel = {};
+  var deletedTask = null;
+  var deletedWeek = null;
+  var toastTimer = null;
+  var addSubId = null; // task ID currently adding subtask to
+  var dragSrcId = null;
 
   // --- Storage ---
   var canLS = false;
@@ -353,6 +477,35 @@
   function nextKey(k) { var m = parseKey(k); m.setDate(m.getDate()+7); return toKey(m); }
   function prevKeyOf(k) { var m = parseKey(k); m.setDate(m.getDate()-7); return toKey(m); }
 
+  function dayIdxFromDate(d) { var dow = d.getDay(); return dow === 0 ? 6 : dow - 1; }
+
+  // --- Toast (undo delete) ---
+  function showToast(msg) {
+    var el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.add('vis');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() {
+      el.classList.remove('vis');
+      deletedTask = null;
+      deletedWeek = null;
+    }, 5000);
+  }
+  function hideToast() {
+    document.getElementById('toast').classList.remove('vis');
+    clearTimeout(toastTimer);
+    deletedTask = null;
+    deletedWeek = null;
+  }
+  function undoDelete() {
+    if (!deletedTask || !deletedWeek) return;
+    if (!allTasks[deletedWeek]) allTasks[deletedWeek] = [];
+    allTasks[deletedWeek].push(deletedTask);
+    save();
+    hideToast();
+    render();
+  }
+
   // --- Navigation ---
   function go(dir) {
     var mon = parseKey(weekKey);
@@ -363,14 +516,97 @@
   }
   function goToday() { weekKey = todayKey(); selDay = null; render(); }
 
+  // --- Recurring tasks ---
+  function generateRecurring() {
+    // Scan all tasks for recurrence; generate copies for current weekKey if not already present
+    var curMon = parseKey(weekKey);
+    Object.keys(allTasks).forEach(function(wk) {
+      (allTasks[wk] || []).forEach(function(t) {
+        if (!t.recur || t.movedTo) return;
+        var srcMon = parseKey(wk);
+        if (srcMon >= curMon) return; // only generate from past/current sources
+        var shouldGenerate = false;
+        var diffMs = curMon.getTime() - srcMon.getTime();
+        var diffWeeks = Math.round(diffMs / (7 * 864e5));
+        if (t.recur === 'weekly' && diffWeeks > 0) shouldGenerate = true;
+        else if (t.recur === 'biweekly' && diffWeeks > 0 && diffWeeks % 2 === 0) shouldGenerate = true;
+        else if (t.recur === 'monthly') {
+          // Generate if roughly 4 weeks apart (28+ days)
+          var diffDays = Math.round(diffMs / 864e5);
+          if (diffDays >= 28 && diffDays % 28 < 7) shouldGenerate = true;
+        }
+        if (!shouldGenerate) return;
+        // Check if already generated
+        var existing = (allTasks[weekKey] || []);
+        var alreadyExists = existing.some(function(e) {
+          return e.recurSrcId === t.id && e.recurSrcWeek === wk;
+        });
+        if (alreadyExists) return;
+        if (!allTasks[weekKey]) allTasks[weekKey] = [];
+        allTasks[weekKey].push({
+          id: uid(),
+          text: t.text,
+          done: false,
+          day: t.day,
+          at: Date.now(),
+          priority: t.priority || null,
+          category: t.category || null,
+          recur: t.recur,
+          recurSrcId: t.id,
+          recurSrcWeek: wk,
+          subtasks: []
+        });
+      });
+    });
+    save();
+  }
+
   // --- Task actions ---
   function addTask() {
     var inp = document.getElementById('ai');
     var txt = inp.value.trim();
     if (!txt) return;
-    if (!allTasks[weekKey]) allTasks[weekKey] = [];
-    allTasks[weekKey].push({id:uid(), text:txt, done:false, day:selDay, at:Date.now()});
-    save(); inp.value = ''; updBtn(); render(); inp.focus();
+
+    // Determine which week to add to
+    var addWeek = weekKey;
+    var addDay = selDay;
+    if (targetDate) {
+      addWeek = toKey(targetDate);
+      addDay = dayIdxFromDate(targetDate);
+    }
+
+    if (!allTasks[addWeek]) allTasks[addWeek] = [];
+    allTasks[addWeek].push({
+      id: uid(),
+      text: txt,
+      done: false,
+      day: addDay,
+      at: Date.now(),
+      priority: selPri,
+      category: selCat,
+      recur: selRecur,
+      subtasks: []
+    });
+    save();
+    inp.value = '';
+    selPri = null;
+    selCat = null;
+    selRecur = null;
+
+    // If added to a different week, show feedback
+    if (addWeek !== weekKey) {
+      var savedTarget = targetDate;
+      targetDate = null;
+      updBtn(); renderAddBar();
+      showToast('Task added to ' + weekRange(addWeek));
+      // Temporarily override undo to clear the toast only (not a delete)
+      deletedTask = null; deletedWeek = null;
+      render();
+      inp.focus();
+      return;
+    }
+    targetDate = null;
+    updBtn(); renderAddBar(); render(); inp.focus();
     setTimeout(function(){ document.getElementById('tlist').scrollTop = 99999; }, 60);
   }
 
@@ -381,13 +617,19 @@
   }
 
   function del(id) {
+    var t = wt().find(function(x){return x.id===id;});
+    if (t) {
+      deletedTask = JSON.parse(JSON.stringify(t));
+      deletedWeek = weekKey;
+    }
     allTasks[weekKey] = wt().filter(function(x){return x.id!==id;});
     save(); render();
+    showToast('Task deleted');
   }
 
   function startEd(id) {
     var t = wt().find(function(x){return x.id===id;});
-    if (t && t.movedTo) return; // can't edit moved tasks
+    if (t && t.movedTo) return;
     editId = id; render();
     var el = document.getElementById('ed-'+id);
     if (el) { el.focus(); el.select(); }
@@ -407,6 +649,165 @@
   }
 
   function setSel(d) { selDay = d; render(); }
+
+  // --- Priority/Category cycling on existing tasks ---
+  function cyclePri(id) {
+    var t = wt().find(function(x){return x.id===id;});
+    if (!t || t.movedTo) return;
+    var cycle = [null,'high','med','low'];
+    var idx = cycle.indexOf(t.priority || null);
+    t.priority = cycle[(idx + 1) % cycle.length];
+    save(); render();
+  }
+
+  // --- Subtask actions ---
+  function addSubtask(taskId) {
+    addSubId = taskId;
+    render();
+    var el = document.getElementById('sub-inp-'+taskId);
+    if (el) el.focus();
+  }
+
+  function saveSubtask(taskId) {
+    var el = document.getElementById('sub-inp-'+taskId);
+    if (!el) return;
+    var txt = el.value.trim();
+    addSubId = null;
+    if (txt) {
+      var t = wt().find(function(x){return x.id===taskId;});
+      if (t) {
+        if (!t.subtasks) t.subtasks = [];
+        t.subtasks.push({id: uid(), text: txt, done: false});
+        save();
+      }
+    }
+    render();
+  }
+
+  function toggleSub(taskId, subId) {
+    var t = wt().find(function(x){return x.id===taskId;});
+    if (t && t.subtasks) {
+      var s = t.subtasks.find(function(x){return x.id===subId;});
+      if (s) s.done = !s.done;
+      save(); render();
+    }
+  }
+
+  function delSub(taskId, subId) {
+    var t = wt().find(function(x){return x.id===taskId;});
+    if (t && t.subtasks) {
+      t.subtasks = t.subtasks.filter(function(x){return x.id!==subId;});
+      save(); render();
+    }
+  }
+
+  // --- Drag and Drop ---
+  function handleDragStart(e) {
+    dragSrcId = e.target.closest('.ti').getAttribute('data-taskid');
+    e.target.closest('.ti').classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var ti = e.target.closest('.ti');
+    if (ti) {
+      document.querySelectorAll('.ti.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+      ti.classList.add('drag-over');
+    }
+  }
+  function handleDragLeave(e) {
+    var ti = e.target.closest('.ti');
+    if (ti) ti.classList.remove('drag-over');
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.querySelectorAll('.ti.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+    document.querySelectorAll('.ti.dragging').forEach(function(el){ el.classList.remove('dragging'); });
+    var destId = e.target.closest('.ti') ? e.target.closest('.ti').getAttribute('data-taskid') : null;
+    if (!dragSrcId || !destId || dragSrcId === destId) return;
+    var tasks = allTasks[weekKey] || [];
+    var srcIdx = tasks.findIndex(function(t){return t.id===dragSrcId;});
+    var destIdx = tasks.findIndex(function(t){return t.id===destId;});
+    if (srcIdx < 0 || destIdx < 0) return;
+    var item = tasks.splice(srcIdx, 1)[0];
+    tasks.splice(destIdx, 0, item);
+    allTasks[weekKey] = tasks;
+    save(); render();
+  }
+  function handleDragEnd(e) {
+    document.querySelectorAll('.ti.dragging').forEach(function(el){ el.classList.remove('dragging'); });
+    document.querySelectorAll('.ti.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+    dragSrcId = null;
+  }
+
+  // Touch-based drag reorder
+  var touchDragId = null, touchDragEl = null, touchStartY = 0, touchClone = null;
+
+  function handleTouchDragStart(e) {
+    var handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    e.preventDefault();
+    var ti = handle.closest('.ti');
+    touchDragId = ti.getAttribute('data-taskid');
+    touchStartY = e.touches[0].clientY;
+    touchDragEl = ti;
+    // Create a visual clone
+    touchClone = ti.cloneNode(true);
+    touchClone.style.position = 'fixed';
+    touchClone.style.left = ti.getBoundingClientRect().left + 'px';
+    touchClone.style.top = ti.getBoundingClientRect().top + 'px';
+    touchClone.style.width = ti.offsetWidth + 'px';
+    touchClone.style.zIndex = '100';
+    touchClone.style.opacity = '0.85';
+    touchClone.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+    touchClone.style.pointerEvents = 'none';
+    document.body.appendChild(touchClone);
+    ti.style.opacity = '0.3';
+  }
+  function handleTouchDragMove(e) {
+    if (!touchDragId) return;
+    e.preventDefault();
+    var y = e.touches[0].clientY;
+    if (touchClone) touchClone.style.top = y - 25 + 'px';
+    // Highlight drop target
+    document.querySelectorAll('.ti.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+    var elBelow = document.elementFromPoint(e.touches[0].clientX, y);
+    if (elBelow) {
+      var ti = elBelow.closest('.ti');
+      if (ti && ti.getAttribute('data-taskid') !== touchDragId) {
+        ti.classList.add('drag-over');
+      }
+    }
+  }
+  function handleTouchDragEnd(e) {
+    if (!touchDragId) return;
+    document.querySelectorAll('.ti.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+    if (touchClone) { touchClone.remove(); touchClone = null; }
+    if (touchDragEl) touchDragEl.style.opacity = '';
+    // Find drop target
+    var y = e.changedTouches[0].clientY;
+    var elBelow = document.elementFromPoint(e.changedTouches[0].clientX, y);
+    var destId = null;
+    if (elBelow) {
+      var ti = elBelow.closest('.ti');
+      if (ti) destId = ti.getAttribute('data-taskid');
+    }
+    if (destId && destId !== touchDragId) {
+      var tasks = allTasks[weekKey] || [];
+      var srcIdx = tasks.findIndex(function(t){return t.id===touchDragId;});
+      var destIdx = tasks.findIndex(function(t){return t.id===destId;});
+      if (srcIdx >= 0 && destIdx >= 0) {
+        var item = tasks.splice(srcIdx, 1)[0];
+        tasks.splice(destIdx, 0, item);
+        allTasks[weekKey] = tasks;
+        save();
+      }
+    }
+    touchDragId = null;
+    touchDragEl = null;
+    render();
+  }
 
   // --- Rollover ---
   function prevKey() { return prevKeyOf(weekKey); }
@@ -431,10 +832,7 @@
     if (!allTasks[weekKey]) allTasks[weekKey] = [];
 
     inc.forEach(function(t) {
-      // Mark original task as moved in the source week
       t.movedTo = weekKey;
-
-      // Add copy to current week
       allTasks[weekKey].push({
         id: uid(),
         text: t.text,
@@ -442,24 +840,23 @@
         day: null,
         at: Date.now(),
         rolledFrom: pk,
-        originalId: t.id
+        originalId: t.id,
+        priority: t.priority || null,
+        category: t.category || null,
+        subtasks: t.subtasks ? JSON.parse(JSON.stringify(t.subtasks)) : [],
+        recur: t.recur || null
       });
     });
 
     save(); closeRoll(); render();
   }
 
-  // Undo a rollover: remove from current week and unmark in source week
   function undoRollover(taskId) {
     var task = wt().find(function(x){ return x.id === taskId; });
     if (!task || !task.rolledFrom) return;
-
-    // Unmark the original in the source week
     var srcTasks = allTasks[task.rolledFrom] || [];
     var orig = srcTasks.find(function(x){ return x.id === task.originalId; });
     if (orig) { delete orig.movedTo; }
-
-    // Remove from current week
     allTasks[weekKey] = wt().filter(function(x){ return x.id !== taskId; });
     save(); render();
   }
@@ -479,8 +876,66 @@
     });
   }
 
+  // --- Render Add Bar Options ---
+  function renderAddBar() {
+    // Priority row
+    var ph = '<span class="opt-lbl">Priority:</span><button class="opt-btn' + (selPri===null?' act':'') + '" data-pri="none">None</button>';
+    PRIORITIES.forEach(function(p){
+      ph += '<button class="opt-btn pri-'+p.key+'-btn'+(selPri===p.key?' act':'')+'" data-pri="'+p.key+'">'+p.label+'</button>';
+    });
+    document.getElementById('priRow').innerHTML = ph;
+    document.querySelectorAll('#priRow .opt-btn').forEach(function(b){
+      b.onclick = function(){ selPri = this.getAttribute('data-pri')==='none' ? null : this.getAttribute('data-pri'); renderAddBar(); };
+    });
+
+    // Category row
+    var ch = '<span class="opt-lbl">Tag:</span><button class="opt-btn'+(selCat===null?' act':'')+'" data-cat="none">None</button>';
+    CATEGORIES.forEach(function(c){
+      ch += '<button class="opt-btn'+(selCat===c.key?' act':'')+'" data-cat="'+c.key+'" style="'+(selCat===c.key?'background:'+c.color+';border-color:'+c.color+';color:#fff':'')+'">'+c.label+'</button>';
+    });
+    // Recurrence
+    ch += '<span class="opt-lbl" style="margin-left:8px">Repeat:</span><button class="opt-btn'+(selRecur===null?' act':'')+'" data-rec="none">None</button>';
+    RECURRENCE.forEach(function(r){
+      ch += '<button class="opt-btn'+(selRecur===r.key?' act':'')+'" data-rec="'+r.key+'" style="'+(selRecur===r.key?'background:var(--green);border-color:var(--green);color:#fff':'')+'">'+r.label+'</button>';
+    });
+    document.getElementById('catRow').innerHTML = ch;
+    document.querySelectorAll('#catRow .opt-btn[data-cat]').forEach(function(b){
+      b.onclick = function(){ selCat = this.getAttribute('data-cat')==='none' ? null : this.getAttribute('data-cat'); renderAddBar(); };
+    });
+    document.querySelectorAll('#catRow .opt-btn[data-rec]').forEach(function(b){
+      b.onclick = function(){ selRecur = this.getAttribute('data-rec')==='none' ? null : this.getAttribute('data-rec'); renderAddBar(); };
+    });
+
+    // Date picker row
+    var dh = '<span class="date-pick-lbl">Date:</span>';
+    dh += '<input type="date" class="date-pick-input" id="datePickInput" value="'+(targetDate ? targetDate.toISOString().split('T')[0] : '')+'">';
+    if (targetDate) {
+      var twk = toKey(targetDate);
+      dh += '<span class="date-pick-week">' + weekRange(twk) + '</span>';
+      dh += '<button class="date-pick-clear" id="datePickClear">✕</button>';
+    }
+    document.getElementById('dateRow').innerHTML = dh;
+    var dpi = document.getElementById('datePickInput');
+    if (dpi) {
+      dpi.onchange = function() {
+        if (this.value) {
+          var parts = this.value.split('-');
+          targetDate = new Date(+parts[0], +parts[1]-1, +parts[2]);
+        } else {
+          targetDate = null;
+        }
+        renderAddBar();
+      };
+    }
+    var dpc = document.getElementById('datePickClear');
+    if (dpc) {
+      dpc.onclick = function(){ targetDate = null; renderAddBar(); };
+    }
+  }
+
   // --- Render ---
   function render() {
+    generateRecurring();
     var tasks = wt();
     var isCur = weekKey === todayKey();
     var wd = weekDiff(weekKey);
@@ -519,7 +974,7 @@
     });
 
     // Add day row
-    var ah = '<span class="adl">Assign:</span><button class="adp'+(selDay===null?' act':'')+'" data-ad="gen">General</button>';
+    var ah = '<span class="adl">Day:</span><button class="adp'+(selDay===null?' act':'')+'" data-ad="gen">General</button>';
     DAYS.forEach(function(l,i){
       ah += '<button class="adp'+(selDay===i?' act':'')+'" data-ad="'+i+'">'+l+'</button>';
     });
@@ -528,12 +983,19 @@
       b.onclick = function(){ var d = this.getAttribute('data-ad'); setSel(d==='gen'?null:+d); };
     });
 
-    // Tasks - sort: active first, then done, then moved-to-next-week at bottom
+    renderAddBar();
+
+    // Tasks - sort: priority (high first), then active, done, moved
     var filtered = selDay === null ? tasks : tasks.filter(function(t){return t.day===selDay || t.movedTo;});
     var sorted = filtered.slice().sort(function(a,b){
       var aW = a.movedTo ? 2 : (a.done ? 1 : 0);
       var bW = b.movedTo ? 2 : (b.done ? 1 : 0);
-      return aW - bW;
+      if (aW !== bW) return aW - bW;
+      // Within same status, sort by priority
+      var priOrder = {high:0, med:1, low:2};
+      var ap = a.priority ? priOrder[a.priority] : 3;
+      var bp = b.priority ? priOrder[b.priority] : 3;
+      return ap - bp;
     });
 
     var tl = document.getElementById('tlist');
@@ -548,7 +1010,6 @@
         var isMoved = !!t.movedTo;
         var isRolled = !!t.rolledFrom;
 
-        // Build the target week label for moved tasks
         var movedLabel = '';
         if (isMoved) {
           var mwd = weekDiff(t.movedTo);
@@ -570,7 +1031,43 @@
         if (isMoved) txtCls += ' moved-txt';
         else if (t.done) txtCls += ' dnt';
 
-        return '<div class="'+itemCls+'">' +
+        // Category info
+        var catInfo = t.category ? CATEGORIES.find(function(c){return c.key===t.category;}) : null;
+
+        // Subtasks
+        var subHtml = '';
+        if (t.subtasks && t.subtasks.length > 0 && !isMoved) {
+          var subDone = t.subtasks.filter(function(s){return s.done;}).length;
+          subHtml += '<div class="subtasks">';
+          subHtml += '<span class="sub-prog">Subtasks: '+subDone+'/'+t.subtasks.length+'</span>';
+          t.subtasks.forEach(function(s){
+            subHtml += '<div class="sub-item">' +
+              '<button class="sub-cb'+(s.done?' chk':'')+'" data-stid="'+t.id+'" data-sid="'+s.id+'">'+(s.done?'✓':'')+'</button>' +
+              '<span class="sub-txt'+(s.done?' sub-done':'')+'">'+esc(s.text)+'</span>' +
+              '<button class="sub-del" data-sdtid="'+t.id+'" data-sdid="'+s.id+'">×</button>' +
+            '</div>';
+          });
+          subHtml += '</div>';
+        }
+        // Add subtask input
+        if (addSubId === t.id && !isMoved) {
+          subHtml += '<div class="sub-item" style="margin-top:4px">' +
+            '<input class="sub-input" id="sub-inp-'+t.id+'" placeholder="Add subtask...">' +
+          '</div>';
+        }
+
+        // Priority dot
+        var priDot = '';
+        if (t.priority && !isMoved) {
+          priDot = '<div class="pri-dot pri-'+t.priority+'" data-prid="'+t.id+'" title="Click to change priority" style="cursor:pointer"></div>';
+        }
+
+        // Drag handle
+        var dragH = isMoved ? '' : '<span class="drag-handle" draggable="true">⋮⋮</span>';
+
+        return '<div class="'+itemCls+'" data-taskid="'+t.id+'" draggable="false">' +
+          dragH +
+          (priDot ? priDot : '') +
           '<button class="'+cbCls+'" data-tid="'+t.id+'">'+(t.done && !isMoved?'✓':'')+'</button>' +
           '<div class="tc">' +
             (isEd && !isMoved
@@ -578,15 +1075,22 @@
               : '<span class="'+txtCls+'"'+(isMoved?'':' data-eid="'+t.id+'"')+'>'+esc(t.text)+'</span>') +
             '<div class="tm">' +
               (t.day!=null && !isMoved ? '<span class="dtag">'+DAYS[t.day]+'</span>' : '') +
+              (t.priority && !isMoved ? '<span class="ptag pri-'+t.priority+'">'+({high:'High',med:'Med',low:'Low'}[t.priority])+'</span>' : '') +
+              (catInfo && !isMoved ? '<span class="ctag" style="background:'+catInfo.bg+';color:'+catInfo.color+'">'+catInfo.label+'</span>' : '') +
+              (t.recur && !isMoved ? '<span class="rectag">↻ '+({weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly'}[t.recur])+'</span>' : '') +
               (isRolled ? '<span class="rtag">↻ Rolled over</span>' : '') +
               (isMoved ? '<span class="mvtag">'+movedLabel+'</span>' : '') +
             '</div>' +
+            subHtml +
           '</div>' +
           (isMoved
             ? ''
-            : (isRolled
-              ? '<button class="db" data-uid="'+t.id+'" title="Undo rollover" style="color:#b4a0e8;font-size:16px;">↩</button>'
-              : '<button class="db" data-did="'+t.id+'">×</button>')
+            : '<div style="display:flex;flex-direction:column;gap:4px;align-items:center">' +
+              (isRolled
+                ? '<button class="db" data-uid="'+t.id+'" title="Undo rollover" style="color:#b4a0e8;font-size:16px;">↩</button>'
+                : '<button class="db" data-did="'+t.id+'">×</button>') +
+              '<button class="db" data-subid="'+t.id+'" title="Add subtask" style="font-size:14px;color:#bbb;">☰</button>' +
+            '</div>'
           ) +
         '</div>';
       }).join('') + '<div class="rst"><button class="rstb" id="rstBtn">Reset All Data</button></div>';
@@ -604,15 +1108,48 @@
       document.querySelectorAll('.db[data-uid]').forEach(function(b){
         b.onclick = function(){ undoRollover(this.getAttribute('data-uid')); };
       });
+      document.querySelectorAll('.db[data-subid]').forEach(function(b){
+        b.onclick = function(){ addSubtask(this.getAttribute('data-subid')); };
+      });
+      document.querySelectorAll('.pri-dot[data-prid]').forEach(function(b){
+        b.onclick = function(){ cyclePri(this.getAttribute('data-prid')); };
+      });
+      // Subtask events
+      document.querySelectorAll('.sub-cb[data-stid]').forEach(function(b){
+        b.onclick = function(){ toggleSub(this.getAttribute('data-stid'), this.getAttribute('data-sid')); };
+      });
+      document.querySelectorAll('.sub-del[data-sdtid]').forEach(function(b){
+        b.onclick = function(){ delSub(this.getAttribute('data-sdtid'), this.getAttribute('data-sdid')); };
+      });
+      document.querySelectorAll('.sub-input').forEach(function(el){
+        var tid = el.id.replace('sub-inp-','');
+        el.onblur = function(){ saveSubtask(tid); };
+        el.onkeydown = function(e){ if(e.key==='Enter') saveSubtask(tid); if(e.key==='Escape'){addSubId=null;render();} };
+      });
       document.querySelectorAll('.ei').forEach(function(el){
         el.onblur = function(){ saveEd(this.id.replace('ed-','')); };
         el.onkeydown = function(e){ if(e.key==='Enter') saveEd(this.id.replace('ed-','')); if(e.key==='Escape'){editId=null;render();} };
       });
       var rb = document.getElementById('rstBtn');
       if (rb) rb.onclick = function(){ if(confirm('Clear ALL tasks?')){allTasks={};save();render();} };
+
+      // Drag and drop (desktop)
+      document.querySelectorAll('.drag-handle').forEach(function(h){
+        h.addEventListener('dragstart', handleDragStart);
+      });
+      document.querySelectorAll('.ti[data-taskid]').forEach(function(el){
+        el.addEventListener('dragover', handleDragOver);
+        el.addEventListener('dragleave', handleDragLeave);
+        el.addEventListener('drop', handleDrop);
+        el.addEventListener('dragend', handleDragEnd);
+      });
+      // Touch drag
+      document.querySelectorAll('.drag-handle').forEach(function(h){
+        h.addEventListener('touchstart', handleTouchDragStart, {passive:false});
+      });
     }
 
-    // Rollover banner - show only if there are eligible tasks (not done AND not already moved)
+    // Rollover banner
     var inc = incPrev();
     var rbe = document.getElementById('rb');
     rbe.classList.toggle('vis', inc.length > 0);
@@ -636,19 +1173,28 @@
   document.getElementById('mConfirm').addEventListener('click', doRoll);
   document.getElementById('mo').addEventListener('click', function(e){ if(e.target===this) closeRoll(); });
   document.getElementById('mdInner').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.getElementById('toastUndo').addEventListener('click', undoDelete);
 
   var inp = document.getElementById('ai');
   inp.addEventListener('input', updBtn);
   inp.addEventListener('keydown', function(e){ if(e.key==='Enter') addTask(); });
   document.getElementById('abtn').addEventListener('click', addTask);
 
-  // Swipe
-  var tx=0, ty=0, tl=document.getElementById('tlist');
-  tl.addEventListener('touchstart', function(e){ tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
-  tl.addEventListener('touchend', function(e){
+  // Swipe (only if not touch-dragging)
+  var tx=0, ty=0, tlEl=document.getElementById('tlist');
+  tlEl.addEventListener('touchstart', function(e){
+    if (e.target.closest('.drag-handle')) return;
+    tx=e.touches[0].clientX; ty=e.touches[0].clientY;
+  }, {passive:true});
+  tlEl.addEventListener('touchend', function(e){
+    if (touchDragId) return;
     var dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
     if(Math.abs(dx)>80 && Math.abs(dx)>Math.abs(dy)*1.5) go(dx>0?-1:1);
   }, {passive:true});
+
+  // Touch drag global listeners
+  document.addEventListener('touchmove', handleTouchDragMove, {passive:false});
+  document.addEventListener('touchend', handleTouchDragEnd, {passive:false});
 
 })();
 </script>
