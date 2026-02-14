@@ -348,6 +348,72 @@
     font-family:inherit; padding:2px 4px;
   }
   .date-pick-week { font-size:10px; color:var(--accent); font-weight:600; white-space:nowrap; }
+
+  /* EDIT TASK MODAL */
+  .edit-mo {
+    position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:55;
+    display:none; align-items:center; justify-content:center; padding:20px;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .edit-mo.vis { display:flex; }
+  .edit-md {
+    background:var(--bg-card); border-radius:20px; padding:22px 20px;
+    max-width:380px; width:100%; max-height:75vh; overflow-y:auto;
+    border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,0.15);
+    animation:mi 0.25s ease-out;
+  }
+  .edit-md-t { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--accent); margin-bottom:14px; }
+  .edit-field { margin-bottom:12px; }
+  .edit-label { font-size:12px; font-weight:600; color:var(--text-sec); margin-bottom:5px; display:block; }
+  .edit-text-input {
+    width:100%; padding:10px 12px; background:var(--bg); border:1.5px solid var(--border-s);
+    border-radius:var(--r-sm); font-size:14px; font-family:inherit; color:var(--text); outline:none;
+  }
+  .edit-text-input:focus { border-color:var(--accent); }
+  .edit-opts { display:flex; flex-wrap:wrap; gap:5px; }
+  .edit-opt {
+    background:var(--bg); border:1px solid var(--border); color:var(--text-sec);
+    padding:6px 12px; border-radius:var(--r-sm); font-size:12px; cursor:pointer;
+    font-family:inherit; font-weight:500;
+  }
+  .edit-opt:active { transform:scale(0.95); }
+  .edit-opt.act { color:#fff; }
+  .edit-actions { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
+  .edit-cancel {
+    padding:10px 18px; border-radius:12px; border:1px solid var(--border-s);
+    background:transparent; color:var(--text-sec); font-size:14px; cursor:pointer; font-family:inherit;
+  }
+  .edit-save {
+    padding:10px 18px; border-radius:12px; border:none; background:var(--accent);
+    color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;
+    box-shadow:0 2px 8px rgba(232,93,42,0.3);
+  }
+
+  /* DELETE CONFIRM MODAL */
+  .del-mo {
+    position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:55;
+    display:none; align-items:center; justify-content:center; padding:20px;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .del-mo.vis { display:flex; }
+  .del-md {
+    background:var(--bg-card); border-radius:20px; padding:22px 20px;
+    max-width:320px; width:100%; text-align:center;
+    border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,0.15);
+    animation:mi 0.25s ease-out;
+  }
+  .del-md-t { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:#e53e3e; margin-bottom:6px; }
+  .del-md-msg { font-size:13px; color:var(--text-sec); margin-bottom:16px; word-break:break-word; }
+  .del-actions { display:flex; gap:10px; justify-content:center; }
+  .del-cancel {
+    padding:10px 18px; border-radius:12px; border:1px solid var(--border-s);
+    background:transparent; color:var(--text-sec); font-size:14px; cursor:pointer; font-family:inherit;
+  }
+  .del-confirm {
+    padding:10px 18px; border-radius:12px; border:none; background:#e53e3e;
+    color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;
+    box-shadow:0 2px 8px rgba(229,62,62,0.3);
+  }
 </style>
 </head>
 <body>
@@ -394,6 +460,14 @@
     <div class="date-pick-row" id="dateRow"></div>
   </div>
 
+  <div class="edit-mo" id="editMo">
+    <div class="edit-md" id="editMdInner"></div>
+  </div>
+
+  <div class="del-mo" id="delMo">
+    <div class="del-md" id="delMdInner"></div>
+  </div>
+
   <div class="mo" id="mo">
     <div class="md" id="mdInner">
       <h2 class="md-t">Roll Over Tasks</h2>
@@ -420,7 +494,7 @@
     {key:'health',label:'Health',color:'#22a66e',bg:'rgba(34,166,110,0.1)'},
     {key:'finance',label:'Finance',color:'#3b82f6',bg:'rgba(59,130,246,0.1)'}
   ];
-  var RECURRENCE = [{key:'weekly',label:'Weekly'},{key:'biweekly',label:'Biweekly'},{key:'monthly',label:'Monthly'}];
+  var RECURRENCE = [{key:'weekly',label:'Weekly'},{key:'biweekly',label:'Biweekly'},{key:'monthly',label:'Monthly'},{key:'yearly',label:'Yearly'}];
 
   var allTasks = {};
   var weekKey = '';
@@ -429,13 +503,15 @@
   var selCat = null;
   var selRecur = null;
   var targetDate = null; // for future date task creation
-  var editId = null;
   var rollSel = {};
   var deletedTask = null;
   var deletedWeek = null;
   var toastTimer = null;
   var addSubId = null; // task ID currently adding subtask to
   var dragSrcId = null;
+  var editTaskId = null; // task ID being edited in modal
+  var editTaskState = {}; // temp state for edit modal fields
+  var delPendingId = null; // task ID pending delete confirmation
 
   // --- Storage ---
   var canLS = false;
@@ -535,6 +611,16 @@
           var diffDays = Math.round(diffMs / 864e5);
           if (diffDays >= 28 && diffDays % 28 < 7) shouldGenerate = true;
         }
+        else if (t.recur === 'yearly') {
+          var srcDate = parseKey(wk);
+          var curDate = parseKey(weekKey);
+          // Same week-of-year in a different year
+          if (curDate.getFullYear() > srcDate.getFullYear()) {
+            var srcWeekStart = new Date(curDate.getFullYear(), srcDate.getMonth(), srcDate.getDate());
+            var diff = Math.abs(curDate.getTime() - getMonday(srcWeekStart).getTime());
+            if (diff < 7 * 864e5) shouldGenerate = true;
+          }
+        }
         if (!shouldGenerate) return;
         // Check if already generated
         var existing = (allTasks[weekKey] || []);
@@ -617,6 +703,17 @@
   }
 
   function del(id) {
+    // Show confirmation modal
+    delPendingId = id;
+    renderDelModal();
+    document.getElementById('delMo').classList.add('vis');
+  }
+
+  function confirmDel() {
+    var id = delPendingId;
+    delPendingId = null;
+    document.getElementById('delMo').classList.remove('vis');
+    if (!id) return;
     var t = wt().find(function(x){return x.id===id;});
     if (t) {
       deletedTask = JSON.parse(JSON.stringify(t));
@@ -627,25 +724,142 @@
     showToast('Task deleted');
   }
 
-  function startEd(id) {
+  function cancelDel() {
+    delPendingId = null;
+    document.getElementById('delMo').classList.remove('vis');
+  }
+
+  function renderDelModal() {
+    var t = wt().find(function(x){return x.id===delPendingId;});
+    var txt = t ? esc(t.text) : '';
+    document.getElementById('delMdInner').innerHTML =
+      '<h2 class="del-md-t">Delete Task?</h2>' +
+      '<p class="del-md-msg">"' + txt + '"</p>' +
+      '<div class="del-actions">' +
+        '<button class="del-cancel" id="delCancelBtn">Cancel</button>' +
+        '<button class="del-confirm" id="delConfirmBtn">Delete</button>' +
+      '</div>';
+    document.getElementById('delCancelBtn').onclick = cancelDel;
+    document.getElementById('delConfirmBtn').onclick = confirmDel;
+  }
+
+  // --- Edit task modal (full property editing) ---
+  function openEditModal(id) {
     var t = wt().find(function(x){return x.id===id;});
-    if (t && t.movedTo) return;
-    editId = id; render();
-    var el = document.getElementById('ed-'+id);
-    if (el) { el.focus(); el.select(); }
+    if (!t || t.movedTo) return;
+    editTaskId = id;
+    editTaskState = {
+      text: t.text,
+      day: t.day,
+      priority: t.priority || null,
+      category: t.category || null,
+      recur: t.recur || null
+    };
+    renderEditModal();
+    document.getElementById('editMo').classList.add('vis');
+  }
+
+  function closeEditModal() {
+    editTaskId = null;
+    editTaskState = {};
+    document.getElementById('editMo').classList.remove('vis');
+  }
+
+  function saveEditModal() {
+    var t = wt().find(function(x){return x.id===editTaskId;});
+    if (!t) { closeEditModal(); return; }
+    var txtVal = document.getElementById('editTextInput');
+    if (txtVal && txtVal.value.trim()) t.text = txtVal.value.trim();
+    t.day = editTaskState.day;
+    t.priority = editTaskState.priority;
+    t.category = editTaskState.category;
+    t.recur = editTaskState.recur;
+    save();
+    closeEditModal();
+    render();
+  }
+
+  function renderEditModal() {
+    var s = editTaskState;
+    var h = '<h2 class="edit-md-t">Edit Task</h2>';
+
+    // Text
+    h += '<div class="edit-field"><label class="edit-label">Task</label>';
+    h += '<input class="edit-text-input" id="editTextInput" value="' + esc(s.text) + '"></div>';
+
+    // Day
+    h += '<div class="edit-field"><label class="edit-label">Day</label><div class="edit-opts">';
+    h += '<button class="edit-opt' + (s.day===null?' act':'') + '" data-eday="gen" style="' + (s.day===null?'background:var(--accent);border-color:var(--accent)':'') + '">General</button>';
+    DAYS.forEach(function(l,i){
+      h += '<button class="edit-opt' + (s.day===i?' act':'') + '" data-eday="'+i+'" style="' + (s.day===i?'background:var(--accent);border-color:var(--accent)':'') + '">' + l + '</button>';
+    });
+    h += '</div></div>';
+
+    // Priority
+    h += '<div class="edit-field"><label class="edit-label">Priority</label><div class="edit-opts">';
+    h += '<button class="edit-opt' + (s.priority===null?' act':'') + '" data-epri="none" style="' + (s.priority===null?'background:var(--accent);border-color:var(--accent)':'') + '">None</button>';
+    PRIORITIES.forEach(function(p){
+      var colors = {high:'#e53e3e',med:'#eab308',low:'#60a5fa'};
+      var isAct = s.priority===p.key;
+      h += '<button class="edit-opt' + (isAct?' act':'') + '" data-epri="'+p.key+'" style="' + (isAct?'background:'+colors[p.key]+';border-color:'+colors[p.key]:'') + '">' + p.label + '</button>';
+    });
+    h += '</div></div>';
+
+    // Category
+    h += '<div class="edit-field"><label class="edit-label">Tag</label><div class="edit-opts">';
+    h += '<button class="edit-opt' + (s.category===null?' act':'') + '" data-ecat="none" style="' + (s.category===null?'background:var(--accent);border-color:var(--accent)':'') + '">None</button>';
+    CATEGORIES.forEach(function(c){
+      var isAct = s.category===c.key;
+      h += '<button class="edit-opt' + (isAct?' act':'') + '" data-ecat="'+c.key+'" style="' + (isAct?'background:'+c.color+';border-color:'+c.color:'') + '">' + c.label + '</button>';
+    });
+    h += '</div></div>';
+
+    // Recurrence
+    h += '<div class="edit-field"><label class="edit-label">Repeat</label><div class="edit-opts">';
+    h += '<button class="edit-opt' + (s.recur===null?' act':'') + '" data-erec="none" style="' + (s.recur===null?'background:var(--accent);border-color:var(--accent)':'') + '">None</button>';
+    RECURRENCE.forEach(function(r){
+      var isAct = s.recur===r.key;
+      h += '<button class="edit-opt' + (isAct?' act':'') + '" data-erec="'+r.key+'" style="' + (isAct?'background:var(--green);border-color:var(--green)':'') + '">' + r.label + '</button>';
+    });
+    h += '</div></div>';
+
+    // Actions
+    h += '<div class="edit-actions">';
+    h += '<button class="edit-cancel" id="editCancelBtn">Cancel</button>';
+    h += '<button class="edit-save" id="editSaveBtn">Save</button>';
+    h += '</div>';
+
+    document.getElementById('editMdInner').innerHTML = h;
+
+    // Attach edit modal events
+    document.getElementById('editCancelBtn').onclick = closeEditModal;
+    document.getElementById('editSaveBtn').onclick = saveEditModal;
+    document.querySelectorAll('[data-eday]').forEach(function(b){
+      b.onclick = function(){ editTaskState.day = this.getAttribute('data-eday')==='gen' ? null : +this.getAttribute('data-eday'); renderEditModal(); };
+    });
+    document.querySelectorAll('[data-epri]').forEach(function(b){
+      b.onclick = function(){ editTaskState.priority = this.getAttribute('data-epri')==='none' ? null : this.getAttribute('data-epri'); renderEditModal(); };
+    });
+    document.querySelectorAll('[data-ecat]').forEach(function(b){
+      b.onclick = function(){ editTaskState.category = this.getAttribute('data-ecat')==='none' ? null : this.getAttribute('data-ecat'); renderEditModal(); };
+    });
+    document.querySelectorAll('[data-erec]').forEach(function(b){
+      b.onclick = function(){ editTaskState.recur = this.getAttribute('data-erec')==='none' ? null : this.getAttribute('data-erec'); renderEditModal(); };
+    });
+    // Keep text in sync
+    var txtInput = document.getElementById('editTextInput');
+    if (txtInput) {
+      txtInput.oninput = function(){ editTaskState.text = this.value; };
+      txtInput.onkeydown = function(e){ if(e.key==='Enter') saveEditModal(); };
+    }
+  }
+
+  function startEd(id) {
+    openEditModal(id);
   }
 
   function saveEd(id) {
-    var el = document.getElementById('ed-'+id);
-    if (!el) return;
-    var txt = el.value.trim();
-    editId = null;
-    if (txt) {
-      var t = wt().find(function(x){return x.id===id;});
-      if (t) t.text = txt;
-      save();
-    }
-    render();
+    // No longer used — editing happens via modal
   }
 
   function setSel(d) { selDay = d; render(); }
@@ -1006,7 +1220,6 @@
       tl.innerHTML = '<div class="empty"><div class="empty-ic">'+(isFut?'🗓️':'📋')+'</div><p class="empty-t">'+msg+'</p><p class="empty-h">Add one below to get started</p></div>';
     } else {
       tl.innerHTML = sorted.map(function(t){
-        var isEd = editId === t.id;
         var isMoved = !!t.movedTo;
         var isRolled = !!t.rolledFrom;
 
@@ -1070,14 +1283,12 @@
           (priDot ? priDot : '') +
           '<button class="'+cbCls+'" data-tid="'+t.id+'">'+(t.done && !isMoved?'✓':'')+'</button>' +
           '<div class="tc">' +
-            (isEd && !isMoved
-              ? '<input class="ei" id="ed-'+t.id+'" value="'+esc(t.text)+'">'
-              : '<span class="'+txtCls+'"'+(isMoved?'':' data-eid="'+t.id+'"')+'>'+esc(t.text)+'</span>') +
+            '<span class="'+txtCls+'"'+(isMoved?'':' data-eid="'+t.id+'"')+'>'+esc(t.text)+'</span>' +
             '<div class="tm">' +
               (t.day!=null && !isMoved ? '<span class="dtag">'+DAYS[t.day]+'</span>' : '') +
               (t.priority && !isMoved ? '<span class="ptag pri-'+t.priority+'">'+({high:'High',med:'Med',low:'Low'}[t.priority])+'</span>' : '') +
               (catInfo && !isMoved ? '<span class="ctag" style="background:'+catInfo.bg+';color:'+catInfo.color+'">'+catInfo.label+'</span>' : '') +
-              (t.recur && !isMoved ? '<span class="rectag">↻ '+({weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly'}[t.recur])+'</span>' : '') +
+              (t.recur && !isMoved ? '<span class="rectag">↻ '+({weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly',yearly:'Yearly'}[t.recur])+'</span>' : '') +
               (isRolled ? '<span class="rtag">↻ Rolled over</span>' : '') +
               (isMoved ? '<span class="mvtag">'+movedLabel+'</span>' : '') +
             '</div>' +
@@ -1089,6 +1300,7 @@
               (isRolled
                 ? '<button class="db" data-uid="'+t.id+'" title="Undo rollover" style="color:#b4a0e8;font-size:16px;">↩</button>'
                 : '<button class="db" data-did="'+t.id+'">×</button>') +
+              '<button class="db" data-editid="'+t.id+'" title="Edit task" style="font-size:14px;color:#bbb;">✎</button>' +
               '<button class="db" data-subid="'+t.id+'" title="Add subtask" style="font-size:14px;color:#bbb;">☰</button>' +
             '</div>'
           ) +
@@ -1108,6 +1320,9 @@
       document.querySelectorAll('.db[data-uid]').forEach(function(b){
         b.onclick = function(){ undoRollover(this.getAttribute('data-uid')); };
       });
+      document.querySelectorAll('.db[data-editid]').forEach(function(b){
+        b.onclick = function(){ openEditModal(this.getAttribute('data-editid')); };
+      });
       document.querySelectorAll('.db[data-subid]').forEach(function(b){
         b.onclick = function(){ addSubtask(this.getAttribute('data-subid')); };
       });
@@ -1125,10 +1340,6 @@
         var tid = el.id.replace('sub-inp-','');
         el.onblur = function(){ saveSubtask(tid); };
         el.onkeydown = function(e){ if(e.key==='Enter') saveSubtask(tid); if(e.key==='Escape'){addSubId=null;render();} };
-      });
-      document.querySelectorAll('.ei').forEach(function(el){
-        el.onblur = function(){ saveEd(this.id.replace('ed-','')); };
-        el.onkeydown = function(e){ if(e.key==='Enter') saveEd(this.id.replace('ed-','')); if(e.key==='Escape'){editId=null;render();} };
       });
       var rb = document.getElementById('rstBtn');
       if (rb) rb.onclick = function(){ if(confirm('Clear ALL tasks?')){allTasks={};save();render();} };
@@ -1174,6 +1385,10 @@
   document.getElementById('mo').addEventListener('click', function(e){ if(e.target===this) closeRoll(); });
   document.getElementById('mdInner').addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('toastUndo').addEventListener('click', undoDelete);
+  document.getElementById('editMo').addEventListener('click', function(e){ if(e.target===this) closeEditModal(); });
+  document.getElementById('editMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.getElementById('delMo').addEventListener('click', function(e){ if(e.target===this) cancelDel(); });
+  document.getElementById('delMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
 
   var inp = document.getElementById('ai');
   inp.addEventListener('input', updBtn);
