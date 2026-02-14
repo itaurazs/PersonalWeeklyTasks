@@ -86,6 +86,7 @@
   }
   .hdr-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
   .title { font-family:'Playfair Display',serif; font-size:26px; font-weight:800; color:var(--accent); letter-spacing:-0.5px; }
+  .ver { font-size:11px; color:var(--text-muted); font-weight:700; margin-left:6px; }
   .today-btn {
     background:var(--accent-light); border:1px solid var(--accent-border); color:var(--accent);
     padding:5px 14px; border-radius:var(--r-pill); font-size:12px; font-weight:600;
@@ -575,6 +576,23 @@
   .dot-ok { background:#eab308; }
   .dot-low { background:#e53e3e; }
 
+  /* About modal */
+  .ab-mo {
+    position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:70;
+    display:none; align-items:center; justify-content:center; padding:18px;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .ab-mo.vis { display:flex; }
+  .ab-md {
+    background:var(--bg-card); border-radius:22px; padding:20px;
+    max-width:420px; width:100%; border:1px solid var(--border); box-shadow:var(--sh-lg);
+  }
+  .ab-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:800; color:var(--accent); }
+  .ab-sub { font-size:12px; color:var(--text-muted); margin:6px 0 12px; }
+  .ab-text { font-size:13px; color:var(--text-sec); line-height:1.5; }
+  .ab-actions { margin-top:14px; display:flex; justify-content:flex-end; }
+  .ab-close { padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); cursor:pointer; }
+
   /* Bulk select */
   .sel-cb {
     width:22px; height:22px; min-width:22px; border-radius:7px;
@@ -612,10 +630,11 @@
 <div id="app">
   <div class="hdr">
     <div class="hdr-top">
-      <h1 class="title">Weekly Tasks</h1>
+      <h1 class="title">Weekly Tasks <span class="ver" id="ver"></span></h1>
       <div class="hdr-actions">
         <button class="today-btn" id="todayBtn">Today</button>
         <button class="icon-btn" id="bulkBtn" title="Bulk Select">✓</button>
+        <button class="icon-btn" id="aboutBtn" title="About">i</button>
         <button class="icon-btn" id="insightsBtn" title="Insights & Settings">☰</button>
       </div>
     </div>
@@ -676,6 +695,10 @@
     <div class="ins-md" id="insMdInner"></div>
   </div>
 
+  <div class="ab-mo" id="abMo">
+    <div class="ab-md" id="abMdInner"></div>
+  </div>
+
   <div class="mo" id="mo">
     <div class="md" id="mdInner">
       <h2 class="md-t">Roll Over Tasks</h2>
@@ -695,6 +718,7 @@
 (function() {
   'use strict';
 
+  var APP_VERSION = '1.2.0';
   var STORAGE_KEY = 'wt5';
   var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var PRIORITIES = [{key:'high',label:'High'},{key:'med',label:'Med'},{key:'low',label:'Low'}];
@@ -2007,6 +2031,24 @@
     document.getElementById('insMo').classList.remove('vis');
   }
 
+  // --- About ---
+  function renderAbout() {
+    var h = '';
+    h += '<div class="ab-title">Weekly Tasks</div>';
+    h += '<div class="ab-sub">Version ' + APP_VERSION + '</div>';
+    h += '<div class="ab-text">A lightweight, offline-first weekly task tracker designed for quick daily planning and weekly reviews. All data is stored locally in your browser.</div>';
+    h += '<div class="ab-actions"><button class="ab-close" id="abCloseBtn">Close</button></div>';
+    document.getElementById('abMdInner').innerHTML = h;
+    document.getElementById('abCloseBtn').onclick = closeAbout;
+  }
+  function openAbout() {
+    renderAbout();
+    document.getElementById('abMo').classList.add('vis');
+  }
+  function closeAbout() {
+    document.getElementById('abMo').classList.remove('vis');
+  }
+
   // --- Export / Import ---
   function exportData() {
     var payload = {
@@ -2314,6 +2356,8 @@
   if (!categories.length) categories = normalizeCategories(DEFAULT_CATEGORIES);
   ensureReminders();
   applyTheme();
+  var ver = document.getElementById('ver');
+  if (ver) ver.textContent = 'v' + APP_VERSION;
   weekKey = todayKey();
   render();
   startReminderLoop();
@@ -2332,6 +2376,9 @@
   document.getElementById('delMo').addEventListener('click', function(e){ if(e.target===this) cancelDel(); });
   document.getElementById('delMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('bulkBtn').addEventListener('click', toggleBulkMode);
+  document.getElementById('aboutBtn').addEventListener('click', openAbout);
+  document.getElementById('abMo').addEventListener('click', function(e){ if(e.target===this) closeAbout(); });
+  document.getElementById('abMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('insightsBtn').addEventListener('click', openInsights);
   document.getElementById('insMo').addEventListener('click', function(e){ if(e.target===this) closeInsights(); });
   document.getElementById('insMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
