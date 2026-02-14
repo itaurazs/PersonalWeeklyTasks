@@ -635,6 +635,7 @@
       <div class="hdr-actions">
         <button class="today-btn" id="todayBtn">Today</button>
         <button class="icon-btn" id="bulkBtn" title="Bulk Select">✓</button>
+        <button class="icon-btn" id="calExportBtn" title="Export to Calendar">📅</button>
         <button class="icon-btn" id="aboutBtn" title="About">i</button>
         <button class="icon-btn" id="insightsBtn" title="Insights & Settings">☰</button>
       </div>
@@ -720,7 +721,7 @@
 (function() {
   'use strict';
 
-  var APP_VERSION = '1.4.0';
+  var APP_VERSION = '1.5.0';
   var STORAGE_KEY = 'wt5';
   var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var PRIORITIES = [{key:'high',label:'High'},{key:'med',label:'Med'},{key:'low',label:'Low'}];
@@ -869,6 +870,65 @@
     var h12 = h % 12 || 12;
     return h12 + ':' + m + ' ' + suffix;
   }
+
+  function exportToICal() {
+    var tasks = wt().filter(function(t){ return !t.movedTo && !t.done; });
+    if (tasks.length === 0) { showToast('No active tasks to export'); return; }
+    var mon = parseKey(weekKey);
+    var lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//WeeklyTasks//EN',
+      'CALSCALE:GREGORIAN'
+    ];
+    tasks.forEach(function(t) {
+      var taskDate;
+      if (t.day != null) {
+        taskDate = new Date(mon);
+        taskDate.setDate(taskDate.getDate() + t.day);
+      } else {
+        taskDate = new Date(mon);
+      }
+      var y = taskDate.getFullYear();
+      var mo = String(taskDate.getMonth() + 1).padStart(2, '0');
+      var d = String(taskDate.getDate()).padStart(2, '0');
+      var dateStr = y + '' + mo + '' + d;
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:' + t.id + '@weeklytasks');
+      lines.push('SUMMARY:' + (t.text || '').replace(/[,;\\]/g, function(c){ return '\\' + c; }));
+      if (t.dueTime) {
+        var tp = t.dueTime.split(':');
+        var timeStr = tp[0].padStart(2,'0') + tp[1].padStart(2,'0') + '00';
+        lines.push('DTSTART:' + dateStr + 'T' + timeStr);
+        // 1 hour duration by default
+        var endH = (parseInt(tp[0],10) + 1) % 24;
+        var endTime = String(endH).padStart(2,'0') + tp[1].padStart(2,'0') + '00';
+        lines.push('DTEND:' + dateStr + 'T' + endTime);
+      } else {
+        lines.push('DTSTART;VALUE=DATE:' + dateStr);
+        lines.push('DTEND;VALUE=DATE:' + dateStr);
+      }
+      if (t.notes) {
+        lines.push('DESCRIPTION:' + t.notes.replace(/\n/g, '\\n').replace(/[,;\\]/g, function(c){ return '\\' + c; }));
+      }
+      var cats = [];
+      if (t.priority) cats.push(t.priority.toUpperCase());
+      var catInfo = t.category ? getCat(t.category) : null;
+      if (catInfo) cats.push(catInfo.label);
+      if (cats.length) lines.push('CATEGORIES:' + cats.join(','));
+      if (t.est) lines.push('DURATION:PT' + t.est + 'M');
+      lines.push('END:VEVENT');
+    });
+    lines.push('END:VCALENDAR');
+    var blob = new Blob([lines.join('\r\n')], {type: 'text/calendar;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tasks-' + weekKey + '.ics';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Exported ' + tasks.length + ' task(s) to calendar');
+  }
+
   function applyTheme() {
     var isDark = settings.theme === 'dark';
     document.body.classList.toggle('dark', isDark);
@@ -2428,6 +2488,7 @@
   document.getElementById('delMo').addEventListener('click', function(e){ if(e.target===this) cancelDel(); });
   document.getElementById('delMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('bulkBtn').addEventListener('click', toggleBulkMode);
+  document.getElementById('calExportBtn').addEventListener('click', exportToICal);
   document.getElementById('aboutBtn').addEventListener('click', openAbout);
   document.getElementById('abMo').addEventListener('click', function(e){ if(e.target===this) closeAbout(); });
   document.getElementById('abMdInner').addEventListener('click', function(e){ e.stopPropagation(); });
