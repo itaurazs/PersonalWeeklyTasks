@@ -491,6 +491,7 @@
 
   /* ESTIMATES */
   .etag { font-size:10px; background:rgba(96,165,250,0.12); color:#3b82f6; padding:2px 7px; border-radius:6px; font-weight:600; }
+  .timetag { font-size:10px; background:rgba(168,85,247,0.12); color:#a855f7; padding:2px 7px; border-radius:6px; font-weight:600; }
   .est-row { display:flex; align-items:center; gap:6px; margin-top:6px; }
   .est-input {
     width:80px; padding:6px 8px; background:var(--bg-card); border:1px solid var(--border);
@@ -681,6 +682,7 @@
     <div class="add-opts" id="catRow"></div>
     <div class="date-pick-row" id="dateRow"></div>
     <div class="est-row" id="estRow"></div>
+    <div class="est-row" id="timeRow"></div>
   </div>
 
   <div class="edit-mo" id="editMo">
@@ -718,7 +720,7 @@
 (function() {
   'use strict';
 
-  var APP_VERSION = '1.3.0';
+  var APP_VERSION = '1.4.0';
   var STORAGE_KEY = 'wt5';
   var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var PRIORITIES = [{key:'high',label:'High'},{key:'med',label:'Med'},{key:'low',label:'Low'}];
@@ -740,6 +742,7 @@
   var selCat = null;
   var selRecur = null;
   var selEst = null;
+  var selTime = null; // due time for new task (HH:MM string)
   var targetDate = null; // for future date task creation
   var rollSel = {};
   var deletedTask = null;
@@ -857,6 +860,15 @@
     if (h) return h + 'h';
     return m + 'm';
   }
+  function fmtTime(t) {
+    if (!t) return '';
+    var parts = t.split(':');
+    var h = parseInt(parts[0], 10);
+    var m = parts[1] || '00';
+    var suffix = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12 || 12;
+    return h12 + ':' + m + ' ' + suffix;
+  }
   function applyTheme() {
     var isDark = settings.theme === 'dark';
     document.body.classList.toggle('dark', isDark);
@@ -969,6 +981,7 @@
           recurSrcWeek: wk,
           subtasks: [],
           est: t.est || null,
+          dueTime: t.dueTime || null,
           notes: t.notes || ''
         });
       });
@@ -1002,6 +1015,7 @@
       recur: selRecur,
       subtasks: [],
       est: selEst || null,
+      dueTime: selTime || null,
       notes: ''
     });
     save();
@@ -1010,6 +1024,7 @@
     selCat = null;
     selRecur = null;
     selEst = null;
+    selTime = null;
 
     // If added to a different week, show feedback
     if (addWeek !== weekKey) {
@@ -1191,7 +1206,8 @@
       category: getCat(t.category) ? t.category : null,
       recur: t.recur || null,
       notes: t.notes || '',
-      est: t.est || null
+      est: t.est || null,
+      dueTime: t.dueTime || null
     };
     renderEditModal();
     document.getElementById('editMo').classList.add('vis');
@@ -1214,6 +1230,7 @@
     t.recur = editTaskState.recur;
     t.notes = editTaskState.notes || '';
     t.est = editTaskState.est || null;
+    t.dueTime = editTaskState.dueTime || null;
     save();
     closeEditModal();
     render();
@@ -1271,6 +1288,15 @@
     h += '<div class="edit-field"><label class="edit-label">Time Estimate (minutes)</label>';
     h += '<input class="edit-text-input" id="editEstInput" type="number" min="0" step="5" value="' + (s.est ? s.est : '') + '" placeholder="e.g. 30"></div>';
 
+    // Due Time
+    h += '<div class="edit-field"><label class="edit-label">Due Time</label>';
+    h += '<div style="display:flex;align-items:center;gap:8px">';
+    h += '<input class="edit-text-input" id="editTimeInput" type="time" value="' + (s.dueTime ? s.dueTime : '') + '" style="flex:1">';
+    if (s.dueTime) {
+      h += '<button class="opt-btn" id="editTimeClear" style="padding:4px 10px;font-size:12px">Clear</button>';
+    }
+    h += '</div></div>';
+
     // Actions
     h += '<div class="edit-actions">';
     h += '<button class="edit-cancel" id="editCancelBtn">Cancel</button>';
@@ -1310,6 +1336,14 @@
         var v = parseInt(this.value, 10);
         editTaskState.est = isNaN(v) ? null : v;
       };
+    }
+    var timeInput = document.getElementById('editTimeInput');
+    if (timeInput) {
+      timeInput.onchange = function(){ editTaskState.dueTime = this.value || null; renderEditModal(); };
+    }
+    var timeClear = document.getElementById('editTimeClear');
+    if (timeClear) {
+      timeClear.onclick = function(){ editTaskState.dueTime = null; renderEditModal(); };
     }
   }
 
@@ -1641,6 +1675,22 @@
         var v = parseInt(this.value, 10);
         selEst = isNaN(v) ? null : v;
       };
+    }
+
+    // Due time row
+    var th = '<span class="est-label">Due Time:</span>' +
+      '<input class="est-input" id="timeInput" type="time" value="' + (selTime ? selTime : '') + '">';
+    if (selTime) {
+      th += '<button class="date-pick-clear" id="timeClear">✕</button>';
+    }
+    document.getElementById('timeRow').innerHTML = th;
+    var ti = document.getElementById('timeInput');
+    if (ti) {
+      ti.onchange = function(){ selTime = this.value || null; renderAddBar(); };
+    }
+    var tc = document.getElementById('timeClear');
+    if (tc) {
+      tc.onclick = function(){ selTime = null; renderAddBar(); };
     }
   }
 
@@ -2242,6 +2292,7 @@
               (t.day!=null && !isMoved ? '<span class="dtag">'+DAYS[t.day]+'</span>' : '') +
               (t.priority && !isMoved ? '<span class="ptag pri-'+t.priority+'">'+({high:'High',med:'Med',low:'Low'}[t.priority])+'</span>' : '') +
               (catInfo && !isMoved ? '<span class="ctag" style="background:'+catInfo.bg+';color:'+catInfo.color+'">'+catInfo.label+'</span>' : '') +
+              (t.dueTime && !isMoved ? '<span class="timetag">🕐 '+fmtTime(t.dueTime)+'</span>' : '') +
               (t.est && !isMoved ? '<span class="etag">⏱ '+fmtMinutes(t.est)+'</span>' : '') +
               (t.recur && !isMoved ? '<span class="rectag">↻ '+({daily:'Daily',weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly',yearly:'Yearly'}[t.recur])+'</span>' : '') +
               (isRolled ? '<span class="rtag">↻ Rolled over</span>' : '') +
