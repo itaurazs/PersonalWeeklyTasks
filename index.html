@@ -718,7 +718,7 @@
 (function() {
   'use strict';
 
-  var APP_VERSION = '1.2.0';
+  var APP_VERSION = '1.3.0';
   var STORAGE_KEY = 'wt5';
   var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var PRIORITIES = [{key:'high',label:'High'},{key:'med',label:'Med'},{key:'low',label:'Low'}];
@@ -729,7 +729,7 @@
     {key:'health',label:'Health',color:'#22a66e',bg:'rgba(34,166,110,0.1)'},
     {key:'finance',label:'Finance',color:'#3b82f6',bg:'rgba(59,130,246,0.1)'}
   ];
-  var RECURRENCE = [{key:'weekly',label:'Weekly'},{key:'biweekly',label:'Biweekly'},{key:'monthly',label:'Monthly'},{key:'yearly',label:'Yearly'}];
+  var RECURRENCE = [{key:'daily',label:'Daily'},{key:'weekly',label:'Weekly'},{key:'biweekly',label:'Biweekly'},{key:'monthly',label:'Monthly'},{key:'yearly',label:'Yearly'}];
 
   var allTasks = {};
   var categories = [];
@@ -930,7 +930,8 @@
         var shouldGenerate = false;
         var diffMs = curMon.getTime() - srcMon.getTime();
         var diffWeeks = Math.round(diffMs / (7 * 864e5));
-        if (t.recur === 'weekly' && diffWeeks > 0) shouldGenerate = true;
+        if (t.recur === 'daily' && diffWeeks > 0) shouldGenerate = true;
+        else if (t.recur === 'weekly' && diffWeeks > 0) shouldGenerate = true;
         else if (t.recur === 'biweekly' && diffWeeks > 0 && diffWeeks % 2 === 0) shouldGenerate = true;
         else if (t.recur === 'monthly') {
           // Generate if roughly 4 weeks apart (28+ days)
@@ -2242,7 +2243,7 @@
               (t.priority && !isMoved ? '<span class="ptag pri-'+t.priority+'">'+({high:'High',med:'Med',low:'Low'}[t.priority])+'</span>' : '') +
               (catInfo && !isMoved ? '<span class="ctag" style="background:'+catInfo.bg+';color:'+catInfo.color+'">'+catInfo.label+'</span>' : '') +
               (t.est && !isMoved ? '<span class="etag">⏱ '+fmtMinutes(t.est)+'</span>' : '') +
-              (t.recur && !isMoved ? '<span class="rectag">↻ '+({weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly',yearly:'Yearly'}[t.recur])+'</span>' : '') +
+              (t.recur && !isMoved ? '<span class="rectag">↻ '+({daily:'Daily',weekly:'Weekly',biweekly:'Biweekly',monthly:'Monthly',yearly:'Yearly'}[t.recur])+'</span>' : '') +
               (isRolled ? '<span class="rtag">↻ Rolled over</span>' : '') +
               (isMoved ? '<span class="mvtag">'+movedLabel+'</span>' : '') +
               (hasNotes && !isMoved ? '<button class="note-btn" data-noteid="'+t.id+'">'+(showNotes?'Hide notes':'Notes')+'</button>' : '') +
